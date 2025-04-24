@@ -91,29 +91,53 @@
       height: 500px;
       display: flex;
       flex-direction: column;
+      background: #f0f0f0;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .chat-messages {
       flex-grow: 1;
       overflow-y: auto;
       padding: 1rem;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
     }
     .message {
-      max-width: 80%;
+      max-width: 75%;
       margin-bottom: 1rem;
-      padding: 0.75rem;
-      border-radius: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 20px;
+      font-size: 0.95rem;
+      line-height: 1.3;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      word-wrap: break-word;
+      animation: fadeInUp 0.3s ease forwards;
     }
     .message.sent {
       margin-left: auto;
-      background-color: #3B82F6;
+      background-color: #0b93f6;
       color: white;
-      border-bottom-right-radius: 0.25rem;
+      border-bottom-right-radius: 5px;
+      box-shadow: 0 2px 8px rgba(11,147,246,0.4);
     }
     .message.received {
       margin-right: auto;
-      background-color: #E5E7EB;
+      background-color: #e5e5ea;
       color: black;
-      border-bottom-left-radius: 0.25rem;
+      border-bottom-left-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
@@ -130,12 +154,35 @@
           <button class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
             <i class="fas fa-bell text-xl"></i>
           </button>
-          <div class="relative group">
-            <button class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
-              <img class="h-8 w-8 rounded-full bg-gray-200 object-cover" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" alt="Profile">
+          <div class="relative" id="userMenuContainer">
+            <button id="userMenuButton" 
+                    class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
+              <img id="navProfilePic" class="h-8 w-8 rounded-full bg-gray-200 object-cover" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" alt="Profile">
               <span class="font-medium">Mi Cuenta</span>
               <i class="fas fa-chevron-down text-sm"></i>
             </button>
+            <!-- Dropdown Menu -->
+            <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden z-50">
+              <a href="#perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fas fa-user mr-2"></i> Mi Perfil
+              </a>
+              <a href="/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fas fa-cog mr-2"></i> Ajustes de Cuenta
+              </a>
+              <a href="#notificaciones" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fas fa-bell mr-2"></i> Notificaciones
+              </a>
+              <a href="#historial" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fas fa-history mr-2"></i> Historial de Servicios
+              </a>
+              <hr class="my-2 border-gray-200">
+              <a href="#ayuda" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fas fa-question-circle mr-2"></i> Ayuda y Soporte
+              </a>
+              <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -151,38 +198,204 @@
           <h2 class="text-2xl font-semibold mb-4 text-gray-900">Encuentra tu Proveedor de Servicios</h2>
           <div id="map" class="mb-6"></div>
           
+          <h3 class="text-lg font-medium text-gray-900 mb-3">Selecciona el tipo de servicio</h3>
+          
+          <!-- Servicios Técnicos -->
           <div class="mb-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-3">Selecciona el tipo de servicio</h3>
+            <h3 class="text-lg font-medium text-gray-700 mb-3">Servicios Técnicos</h3>
             <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
-              <div class="job-icon bg-blue-50 text-blue-600 text-center" title="Plomería">
+              <div class="job-icon bg-blue-50 text-blue-600 text-center" title="Plomero">
                 <i class="fas fa-wrench text-2xl mb-2"></i>
-                <p class="text-sm">Plomería</p>
+                <p class="text-sm">Plomero</p>
               </div>
-              <div class="job-icon bg-green-50 text-green-600 text-center" title="Electricista">
+              <div class="job-icon bg-yellow-50 text-yellow-600 text-center" title="Electricista">
                 <i class="fas fa-bolt text-2xl mb-2"></i>
                 <p class="text-sm">Electricista</p>
               </div>
-              <div class="job-icon bg-yellow-50 text-yellow-600 text-center" title="Limpieza">
-                <i class="fas fa-broom text-2xl mb-2"></i>
-                <p class="text-sm">Limpieza</p>
+              <div class="job-icon bg-red-50 text-red-600 text-center" title="Electrodomésticos">
+                <i class="fas fa-tv text-2xl mb-2"></i>
+                <p class="text-sm">Electrodomésticos</p>
               </div>
-              <div class="job-icon bg-red-50 text-red-600 text-center" title="Jardinería">
-                <i class="fas fa-seedling text-2xl mb-2"></i>
-                <p class="text-sm">Jardinería</p>
+              <div class="job-icon bg-green-50 text-green-600 text-center" title="Gasfiter">
+                <i class="fas fa-fire text-2xl mb-2"></i>
+                <p class="text-sm">Gasfiter</p>
               </div>
-              <div class="job-icon bg-pink-50 text-pink-600 text-center" title="Niñera">
-                <i class="fas fa-baby text-2xl mb-2"></i>
-                <p class="text-sm">Niñera</p>
+              <div class="job-icon bg-purple-50 text-purple-600 text-center" title="Aire Acondicionado">
+                <i class="fas fa-snowflake text-2xl mb-2"></i>
+                <p class="text-sm">Aire Acondicionado</p>
               </div>
-              <div class="job-icon bg-purple-50 text-purple-600 text-center" title="Tutoría">
-                <i class="fas fa-book text-2xl mb-2"></i>
-                <p class="text-sm">Tutoría</p>
+              <div class="job-icon bg-indigo-50 text-indigo-600 text-center" title="Cerrajero">
+                <i class="fas fa-key text-2xl mb-2"></i>
+                <p class="text-sm">Cerrajero</p>
+              </div>
+              <div class="job-icon bg-pink-50 text-pink-600 text-center" title="Computadores/TV">
+                <i class="fas fa-laptop text-2xl mb-2"></i>
+                <p class="text-sm">Computadores/TV</p>
               </div>
             </div>
           </div>
 
+          <!-- Limpieza y Orden -->
           <div class="mb-6">
-            <div class="relative">
+            <h3 class="text-lg font-medium text-gray-700 mb-3">Limpieza y Orden</h3>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+              <div class="job-icon bg-blue-50 text-blue-600 text-center" title="Limpieza Profunda">
+                <i class="fas fa-broom text-2xl mb-2"></i>
+                <p class="text-sm">Limpieza Profunda</p>
+              </div>
+              <div class="job-icon bg-green-50 text-green-600 text-center" title="Desinfección">
+                <i class="fas fa-spray-can text-2xl mb-2"></i>
+                <p class="text-sm">Desinfección</p>
+              </div>
+              <div class="job-icon bg-purple-50 text-purple-600 text-center" title="Organización">
+                <i class="fas fa-box text-2xl mb-2"></i>
+                <p class="text-sm">Organización</p>
+              </div>
+              <div class="job-icon bg-yellow-50 text-yellow-600 text-center" title="Lavado Alfombras">
+                <i class="fas fa-soap text-2xl mb-2"></i>
+                <p class="text-sm">Lavado Alfombras</p>
+              </div>
+              <div class="job-icon bg-indigo-50 text-indigo-600 text-center" title="Limpieza Vidrios">
+                <i class="fas fa-window-maximize text-2xl mb-2"></i>
+                <p class="text-sm">Limpieza Vidrios</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estética y Cuidado Personal -->
+          <div class="mb-6">
+            <h3 class="text-lg font-medium text-gray-700 mb-3">Estética y Cuidado Personal</h3>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+              <div class="job-icon bg-blue-50 text-blue-600 text-center" title="Peluquero">
+                <i class="fas fa-cut text-2xl mb-2"></i>
+                <p class="text-sm">Peluquero</p>
+              </div>
+              <div class="job-icon bg-pink-50 text-pink-600 text-center" title="Manicure/Pedicure">
+                <i class="fas fa-hand-sparkles text-2xl mb-2"></i>
+                <p class="text-sm">Manicure/Pedicure</p>
+              </div>
+              <div class="job-icon bg-purple-50 text-purple-600 text-center" title="Maquillaje">
+                <i class="fas fa-paint-brush text-2xl mb-2"></i>
+                <p class="text-sm">Maquillaje</p>
+              </div>
+              <div class="job-icon bg-green-50 text-green-600 text-center" title="Masajes">
+                <i class="fas fa-spa text-2xl mb-2"></i>
+                <p class="text-sm">Masajes</p>
+              </div>
+              <div class="job-icon bg-red-50 text-red-600 text-center" title="Depilación">
+                <i class="fas fa-feather text-2xl mb-2"></i>
+                <p class="text-sm">Depilación</p>
+              </div>
+              <div class="job-icon bg-yellow-50 text-yellow-600 text-center" title="Pestañas/Cejas">
+                <i class="fas fa-eye text-2xl mb-2"></i>
+                <p class="text-sm">Pestañas/Cejas</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cuidado de Personas -->
+          <div class="mb-6">
+            <h3 class="text-lg font-medium text-gray-700 mb-3">Cuidado de Personas</h3>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+              <div class="job-icon bg-pink-50 text-pink-600 text-center" title="Niñera">
+                <i class="fas fa-baby text-2xl mb-2"></i>
+                <p class="text-sm">Niñera</p>
+              </div>
+              <div class="job-icon bg-blue-50 text-blue-600 text-center" title="Cuidador Mayor">
+                <i class="fas fa-user-nurse text-2xl mb-2"></i>
+                <p class="text-sm">Cuidador Mayor</p>
+              </div>
+              <div class="job-icon bg-green-50 text-green-600 text-center" title="Terapeuta">
+                <i class="fas fa-heartbeat text-2xl mb-2"></i>
+                <p class="text-sm">Terapeuta</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Servicios para Mascotas -->
+          <div class="mb-6">
+            <h3 class="text-lg font-medium text-gray-700 mb-3">Servicios para Mascotas</h3>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+              <div class="job-icon bg-blue-50 text-blue-600 text-center" title="Paseador">
+                <i class="fas fa-dog text-2xl mb-2"></i>
+                <p class="text-sm">Paseador</p>
+              </div>
+              <div class="job-icon bg-purple-50 text-purple-600 text-center" title="Peluquero Canino">
+                <i class="fas fa-cut text-2xl mb-2"></i>
+                <p class="text-sm">Peluquero Canino</p>
+              </div>
+              <div class="job-icon bg-green-50 text-green-600 text-center" title="Veterinario">
+                <i class="fas fa-stethoscope text-2xl mb-2"></i>
+                <p class="text-sm">Veterinario</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Servicios Gastronómicos -->
+          <div class="mb-6">
+            <h3 class="text-lg font-medium text-gray-700 mb-3">Servicios Gastronómicos</h3>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+              <div class="job-icon bg-red-50 text-red-600 text-center" title="Chef">
+                <i class="fas fa-utensils text-2xl mb-2"></i>
+                <p class="text-sm">Chef</p>
+              </div>
+              <div class="job-icon bg-pink-50 text-pink-600 text-center" title="Catering">
+                <i class="fas fa-birthday-cake text-2xl mb-2"></i>
+                <p class="text-sm">Catering</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Otros Servicios -->
+          <div class="mb-6">
+            <h3 class="text-lg font-medium text-gray-700 mb-3">Otros Servicios</h3>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+              <div class="job-icon bg-gray-50 text-gray-600 text-center" title="Otro Servicio">
+                <i class="fas fa-plus-circle text-2xl mb-2"></i>
+                <p class="text-sm">Otro Servicio</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Publicar Necesidad -->
+          <div class="mb-6 bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0">
+                <img id="userProfilePic" class="h-12 w-12 rounded-full object-cover cursor-pointer hover:opacity-80" 
+                     src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" 
+                     alt="Profile Picture"
+                     onclick="document.getElementById('profilePhotoInput').click()">
+                <input type="file" id="profilePhotoInput" class="hidden" accept="image/*" onchange="updateProfilePhoto(event)">
+              </div>
+              <div class="flex-grow">
+                <textarea id="needDescription" 
+                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                         placeholder="¿Qué servicio necesitas? Describe tu necesidad..."
+                         rows="3"></textarea>
+                <div class="mt-3 flex justify-between items-center">
+                  <div class="flex space-x-2">
+                    <button class="text-gray-500 hover:text-blue-600" onclick="attachPhoto()">
+                      <i class="fas fa-camera"></i>
+                    </button>
+                    <button class="text-gray-500 hover:text-blue-600" onclick="attachLocation()">
+                      <i class="fas fa-map-marker-alt"></i>
+                    </button>
+                  </div>
+                  <button onclick="publishNeed()" 
+                          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                    Publicar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feed de Necesidades -->
+          <div id="needsFeed" class="space-y-4 mb-6">
+            <!-- Las necesidades publicadas aparecerán aquí -->
+          </div>
+
+          <div class="relative">
               <input
                 type="text"
                 id="searchInput"
@@ -299,6 +512,102 @@
 
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
   <script>
+    // Función para actualizar la foto de perfil
+    function updateProfilePhoto(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          // Actualizar todas las instancias de la foto de perfil
+          const userProfilePics = document.querySelectorAll('#userProfilePic, #navProfilePic');
+          userProfilePics.forEach(pic => {
+            pic.src = e.target.result;
+          });
+          // Aquí se podría agregar la lógica para subir la foto al servidor
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Función para adjuntar foto a la necesidad
+    function attachPhoto() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          // Aquí se podría agregar la lógica para previsualizar y subir la foto
+          alert('Foto adjuntada correctamente');
+        }
+      };
+      input.click();
+    }
+
+    // Función para adjuntar ubicación
+    function attachLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          // Aquí se podría agregar la lógica para mostrar la ubicación en el mapa
+          alert(`Ubicación capturada: ${latitude}, ${longitude}`);
+        });
+      }
+    }
+
+    // Función para publicar una necesidad
+    function publishNeed() {
+      const description = document.getElementById('needDescription').value;
+      if (!description.trim()) {
+        alert('Por favor describe tu necesidad');
+        return;
+      }
+
+      const needsFeed = document.getElementById('needsFeed');
+      const needElement = document.createElement('div');
+      needElement.className = 'bg-white rounded-lg shadow-sm p-4 border border-gray-200 animate-fade-in';
+      needElement.innerHTML = `
+        <div class="flex items-start space-x-4">
+          <img src="${document.getElementById('userProfilePic').src}" 
+               class="h-10 w-10 rounded-full object-cover">
+          <div class="flex-grow">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-medium text-gray-900">Usuario</h4>
+                <p class="text-sm text-gray-500">Ahora mismo</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button class="text-gray-400 hover:text-gray-600">
+                  <i class="fas fa-bell"></i>
+                </button>
+                <button class="text-gray-400 hover:text-gray-600">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+              </div>
+            </div>
+            <p class="mt-2 text-gray-700">${description}</p>
+            <div class="mt-3 flex items-center space-x-4 text-sm text-gray-500">
+              <button class="hover:text-blue-600 flex items-center space-x-1">
+                <i class="far fa-comment"></i>
+                <span>Responder</span>
+              </button>
+              <button class="hover:text-blue-600 flex items-center space-x-1">
+                <i class="far fa-share-square"></i>
+                <span>Compartir</span>
+              </button>
+              <button class="hover:text-red-600 flex items-center space-x-1">
+                <i class="far fa-flag"></i>
+                <span>Reportar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      needsFeed.insertBefore(needElement, needsFeed.firstChild);
+      document.getElementById('needDescription').value = '';
+    }
+
     // Talca center coordinates
     const TALCA_CENTER = [-35.4264, -71.6553];
     
@@ -545,10 +854,40 @@
       loadProviders(job, searchInput.value);
     });
 
-    // Initialize map on page load
+    // Initialize map and user menu on page load
     window.onload = () => {
       initMap();
+      initUserMenu();
     };
+
+    // User menu functionality
+    function initUserMenu() {
+      const menuButton = document.getElementById('userMenuButton');
+      const menu = document.getElementById('userMenu');
+      const logoutLink = document.querySelector('a[href="/logout"]');
+
+      // Toggle menu on button click
+      menuButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.classList.toggle('hidden');
+      });
+
+      // Close menu when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!document.getElementById('userMenuContainer').contains(e.target)) {
+          menu.classList.add('hidden');
+        }
+      });
+
+      // Handle logout
+      logoutLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+          // Aquí se podría agregar la lógica para cerrar sesión
+          window.location.href = '/logout';
+        }
+      });
+    }
   </script>
 </body>
 </html>
