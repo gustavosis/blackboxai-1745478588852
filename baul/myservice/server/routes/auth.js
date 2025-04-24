@@ -86,6 +86,11 @@ router.post('/register', async (req, res) => {
         });
       });
 
+      // Determine redirect URL based on role
+      const redirectUrl = role === 'provider' ? '/provider-view.html' :
+                         role === 'user' ? '/customer-view.html' :
+                         `/${role}/dashboard`;
+
       res.status(201).json({ 
         message: 'Registro exitoso',
         user: {
@@ -96,10 +101,14 @@ router.post('/register', async (req, res) => {
           name,
           lastname
         },
-        redirectUrl: role === 'provider' ? '/provider-view.html' : `/${role}/dashboard`
+        redirectUrl
       });
     } catch (loginError) {
       console.error('Error en login automático:', loginError);
+      const redirectUrl = role === 'provider' ? '/provider-view.html' :
+                         role === 'user' ? '/customer-view.html' :
+                         `/${role}/dashboard`;
+
       res.status(201).json({ 
         message: 'Registro exitoso, pero error en login automático',
         user: {
@@ -108,7 +117,7 @@ router.post('/register', async (req, res) => {
           email,
           role: role || 'user'
         },
-        redirectUrl: role === 'provider' ? '/provider-view.html' : `/${role}/dashboard`
+        redirectUrl
       });
     }
   } catch (error) {
@@ -124,6 +133,12 @@ router.post('/login', (req, res, next) => {
     if (!user) { return res.status(401).json({ error: 'Invalid credentials' }); }
     req.logIn(user, (err) => {
       if (err) { return next(err); }
+
+      // Determine redirect URL based on role
+      const redirectUrl = user.role === 'provider' ? '/provider-view.html' :
+                         user.role === 'user' ? '/customer-view.html' :
+                         `/${user.role}/dashboard`;
+
       return res.json({ 
         message: 'Login successful', 
         user: { 
@@ -132,7 +147,7 @@ router.post('/login', (req, res, next) => {
           email: user.email, 
           role: user.role 
         },
-        redirectUrl: user.role === 'provider' ? '/provider-view.html' : `/${user.role}/dashboard`
+        redirectUrl
       });
     });
   })(req, res, next);
@@ -152,7 +167,10 @@ router.get('/google/callback',
   }),
   (req, res) => {
     const role = req.user.role || 'user';
-    res.redirect(role === 'provider' ? '/provider-view.html' : `/${role}/dashboard`);
+    const redirectUrl = role === 'provider' ? '/provider-view.html' :
+                       role === 'user' ? '/customer-view.html' :
+                       `/${role}/dashboard`;
+    res.redirect(redirectUrl);
   }
 );
 
@@ -170,7 +188,10 @@ router.get('/facebook/callback',
   }),
   (req, res) => {
     const role = req.user.role || 'user';
-    res.redirect(role === 'provider' ? '/provider-view.html' : `/${role}/dashboard`);
+    const redirectUrl = role === 'provider' ? '/provider-view.html' :
+                       role === 'user' ? '/customer-view.html' :
+                       `/${role}/dashboard`;
+    res.redirect(redirectUrl);
   }
 );
 
