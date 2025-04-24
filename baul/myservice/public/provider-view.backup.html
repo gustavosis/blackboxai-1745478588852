@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyService PRO - Vista del Proveedor</title>
+    
+    <!-- Tailwind CSS + Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos y Leaflet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+
+    <style>
+        .card-hover {
+            transition: transform 0.2s ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen antialiased">
+    <!-- Previous navbar content remains the same -->
+
+    <main class="max-w-7xl mx-auto pt-20 pb-6 px-4 sm:px-6 lg:px-8">
+        <!-- Map Section -->
+        <div class="mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hidden" id="mapContainer">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Mi Ubicación y Clientes</h2>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-green-600">
+                            <i class="fas fa-circle text-xs mr-1"></i>
+                            Ubicación compartida
+                        </span>
+                    </div>
+                </div>
+                <div id="map"></div>
+                <div class="mt-4 text-sm text-gray-600">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Los clientes cercanos aparecerán en el mapa cuando soliciten servicios.
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous stats cards and other content remains the same -->
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script>
+        // Development mode flag
+        const isDevelopment = true;
+
+        // Map and location functionality
+        let map = null;
+        let providerMarker = null;
+        const TALCA_CENTER = [-35.4264, -71.6553];
+        let mapInitialized = false;
+
+        // Mock location for testing
+        const useMockLocation = true;
+        const mockLocation = {
+            coords: {
+                latitude: -35.4264,
+                longitude: -71.6553,
+                accuracy: 10
+            }
+        };
+
+        function showLocationPrompt() {
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            overlay.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
+                        Ubicación Requerida
+                    </h3>
+                    <p class="text-gray-600 mb-6">
+                        Para poder ver el mapa y conectarte con clientes cercanos, necesitamos acceso a tu ubicación.
+                    </p>
+                    <button onclick="requestLocation()" 
+                            class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center">
+                        <i class="fas fa-location-arrow mr-2"></i>
+                        Compartir Mi Ubicación
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function initMap(location = TALCA_CENTER) {
+            console.log('Initializing map with location:', location);
+            
+            try {
+                if (map) {
+                    console.log('Removing existing map');
+                    map.remove();
+                }
+
+                const mapContainer = document.getElementById('map');
+                if (!mapContainer) {
+                    throw new Error('Map container not found');
+                }
+
+                console.log('Creating new map instance');
+                map = L.map('map').setView(location, 14);
+                
+                console.log('Adding tile layer');
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+
+                console.log('Adding provider marker');
+                providerMarker = L.marker(location, {
+                    icon: L.divIcon({
+                        className: 'provider-marker',
+                        html: '<div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><i class="fas fa-user text-white"></i></div>',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
+                    })
+                }).addTo(map);
+
+                mapInitialized = true;
+                console.log('Map initialization complete');
+                return true;
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                showNotification('Error al inicializar el mapa: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        function requestLocation() {
+            console.log('Requesting location...');
+            
+            if (useMockLocation) {
+                console.log('Using mock location');
+                handleLocationSuccess(mockLocation);
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                console.error('Geolocation is not supported');
+                showNotification('Tu navegador no soporta geolocalización', 'error');
+                return;
+            }
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            };
+
+            navigator.geolocation.getCurrentPosition(handleLocationSuccess, handleLocationError, options);
+        }
+
+        async function handleLocationSuccess(position) {
+            try {
+                console.log('Location received:', position.coords);
+                
+                // Remove overlay if exists
+                const overlay = document.querySelector('.fixed.inset-0');
+                if (overlay) {
+                    overlay.remove();
+                }
+
+                const providerLocation = [position.coords.latitude, position.coords.longitude];
+                console.log('Provider location:', providerLocation);
+
+                // Show the map container
+                const mapContainer = document.getElementById('mapContainer');
+                if (!mapContainer) {
+                    throw new Error('Map container not found!');
+                }
+
+                // Initialize or update map
+                if (!mapInitialized) {
+                    if (!initMap(providerLocation)) {
+                        throw new Error('Failed to initialize map');
+                    }
+                } else {
+                    map.setView(providerLocation, 14);
+                    providerMarker.setLatLng(providerLocation);
+                }
+
+                // Show map container with animation
+                mapContainer.classList.remove('hidden');
+                mapContainer.classList.add('fade-in');
+
+                // Add popup to provider marker
+                providerMarker.bindPopup('Tu ubicación actual').openPopup();
+
+                // Save provider location to server
+                console.log('Updating provider location on server...');
+                await updateProviderLocation(providerLocation);
+
+                // Show success message
+                showNotification('Ubicación compartida correctamente');
+
+                // Load nearby clients
+                console.log('Loading nearby clients...');
+                await loadNearbyClients(providerLocation);
+
+            } catch (error) {
+                console.error('Error in location handling:', error);
+                showNotification('Error al compartir ubicación: ' + error.message, 'error');
+            }
+        }
+
+        function handleLocationError(error) {
+            console.error('Geolocation error:', error);
+            let errorMsg = 'Error al obtener ubicación: ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg += 'Permiso denegado. Por favor habilita el acceso a la ubicación.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg += 'Ubicación no disponible.';
+                    break;
+                case error.TIMEOUT:
+                    errorMsg += 'Tiempo de espera agotado.';
+                    break;
+                default:
+                    errorMsg += error.message;
+            }
+            showNotification(errorMsg, 'error');
+        }
+
+        async function updateProviderLocation(location) {
+            try {
+                if (isDevelopment) {
+                    console.log('Development mode: Simulating location update success');
+                    return true;
+                }
+
+                const response = await fetch('/api/provider/location', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        latitude: location[0],
+                        longitude: location[1]
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error al actualizar ubicación');
+                }
+                
+                return true;
+            } catch (error) {
+                if (isDevelopment) {
+                    console.warn('Development mode: Ignoring server error:', error);
+                    return true;
+                }
+                console.error('Error:', error);
+                throw error;
+            }
+        }
+
+        async function loadNearbyClients(location) {
+            try {
+                if (isDevelopment) {
+                    console.log('Development mode: Loading mock nearby clients');
+                    const mockClients = [
+                        {
+                            latitude: location[0] + 0.002,
+                            longitude: location[1] + 0.002,
+                            name: 'Cliente Cercano 1',
+                            distance: 0.5
+                        },
+                        {
+                            latitude: location[0] - 0.001,
+                            longitude: location[1] + 0.001,
+                            name: 'Cliente Cercano 2',
+                            distance: 0.3
+                        }
+                    ];
+                    
+                    mockClients.forEach(client => {
+                        L.marker([client.latitude, client.longitude], {
+                            icon: L.divIcon({
+                                className: 'client-marker',
+                                html: '<div class="w-8 h-8 bg-green-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><i class="fas fa-user text-white"></i></div>',
+                                iconSize: [32, 32],
+                                iconAnchor: [16, 16]
+                            })
+                        })
+                        .addTo(map)
+                        .bindPopup(`
+                            <div class="text-center">
+                                <h3 class="font-semibold">${client.name}</h3>
+                                <p class="text-sm text-gray-600">${client.distance.toFixed(1)} km</p>
+                            </div>
+                        `);
+                    });
+                    return;
+                }
+
+                const response = await fetch(`/api/provider/nearby-clients?lat=${location[0]}&lng=${location[1]}`);
+                const clients = await response.json();
+                
+                clients.forEach(client => {
+                    L.marker([client.latitude, client.longitude], {
+                        icon: L.divIcon({
+                            className: 'client-marker',
+                            html: '<div class="w-8 h-8 bg-green-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><i class="fas fa-user text-white"></i></div>',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16]
+                        })
+                    })
+                    .addTo(map)
+                    .bindPopup(`
+                        <div class="text-center">
+                            <h3 class="font-semibold">${client.name}</h3>
+                            <p class="text-sm text-gray-600">${client.distance.toFixed(1)} km</p>
+                        </div>
+                    `);
+                });
+                
+            } catch (error) {
+                if (isDevelopment) {
+                    console.warn('Development mode: Ignoring server error:', error);
+                    return;
+                }
+                console.error('Error loading nearby clients:', error);
+                throw error;
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            notification.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500 flex items-center space-x-2`;
+            
+            const icon = document.createElement('i');
+            icon.className = `fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`;
+            notification.appendChild(icon);
+            
+            const text = document.createElement('span');
+            text.textContent = message;
+            notification.appendChild(text);
+            
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, showing location prompt...');
+            showLocationPrompt();
+        });
+    </script>
+</body>
+</html>
