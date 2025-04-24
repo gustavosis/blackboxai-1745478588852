@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyService PRO - Ajustes</title>
+    
+    <!-- Tailwind CSS + Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen font-inter">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/customer-view.html" class="flex items-center">
+                        <i class="fas fa-handshake text-blue-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-gray-900">MyService PRO</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
+                        <i class="fas fa-bell text-xl"></i>
+                    </button>
+                    <div class="relative" id="userMenuContainer">
+                        <button id="userMenuButton" class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
+                            <img id="navProfilePic" class="h-8 w-8 rounded-full bg-gray-200 object-cover" 
+                                 src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" 
+                                 alt="Profile">
+                            <span class="font-medium">Mi Cuenta</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <!-- Dropdown Menu -->
+                        <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden z-50">
+                            <a href="#perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-user mr-2"></i> Mi Perfil
+                            </a>
+                            <a href="#ajustes" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-cog mr-2"></i> Ajustes de Cuenta
+                            </a>
+                            <a href="#notificaciones" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-bell mr-2"></i> Notificaciones
+                            </a>
+                            <hr class="my-2 border-gray-200">
+                            <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-20 pb-8 px-4">
+        <div class="max-w-3xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Ajustes de Cuenta</h1>
+
+                <!-- Profile Photo Section -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Foto de Perfil</h2>
+                    <div class="flex items-center space-x-6">
+                        <div class="relative">
+                            <img id="profilePreview" 
+                                 class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg" 
+                                 src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" 
+                                 alt="Profile Picture">
+                            <button onclick="document.getElementById('profilePhotoInput').click()" 
+                                    class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 shadow-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <div>
+                            <input type="file" id="profilePhotoInput" class="hidden" accept="image/*" onchange="updateProfilePhoto(event)">
+                            <p class="text-sm text-gray-600 mb-2">Sube una foto clara de tu rostro</p>
+                            <button onclick="document.getElementById('profilePhotoInput').click()" 
+                                    class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                                Cambiar foto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Información Personal</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                            <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
+                            <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                            <input type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password Change -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Cambiar Contraseña</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña Actual</label>
+                            <input type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nueva Contraseña</label>
+                            <input type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Nueva Contraseña</label>
+                            <input type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Notificaciones</h2>
+                    <div class="space-y-4">
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600">
+                            <span class="text-gray-700">Notificaciones por email</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600">
+                            <span class="text-gray-700">Notificaciones push</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600">
+                            <span class="text-gray-700">Notificaciones de nuevos servicios</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="flex justify-end">
+                    <button onclick="saveSettings()" 
+                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // User menu functionality
+        function initUserMenu() {
+            const menuButton = document.getElementById('userMenuButton');
+            const menu = document.getElementById('userMenu');
+
+            menuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                menu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!document.getElementById('userMenuContainer').contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+        }
+
+        // Profile photo update
+        function updateProfilePhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Update all profile pictures on the page
+                    document.getElementById('profilePreview').src = e.target.result;
+                    document.getElementById('navProfilePic').src = e.target.result;
+                    
+                    // Here you would typically upload the image to your server
+                    // For now, we'll just show a success message
+                    showNotification('Foto de perfil actualizada correctamente');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Save settings
+        function saveSettings() {
+            // Here you would typically save the settings to your server
+            // For now, we'll just show a success message
+            showNotification('Cambios guardados correctamente');
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        // Initialize on page load
+        window.onload = () => {
+            initUserMenu();
+        };
+    </script>
+</body>
+</html>
