@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyService - Plataforma de Servicios</title>
+  
+  <!-- Tailwind CSS + Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'inter': ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    [x-cloak] { display: none !important; }
+    .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    .auth-input {
+      @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all;
+    }
+    .role-btn {
+      @apply flex flex-col items-center justify-center p-4 rounded-lg transition-all hover:shadow-md hover:scale-105 cursor-pointer;
+    }
+    .social-btn {
+      @apply flex items-center justify-center text-white rounded-lg transition-all hover:shadow-md;
+    }
+  </style>
+</head>
+<body class="font-inter bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-xl bg-white rounded-2xl shadow-xl overflow-hidden">
+    <!-- Header -->
+    <div class="bg-blue-600 p-8 text-center">
+      <div class="inline-flex items-center space-x-3 mb-2">
+        <i class="fas fa-handshake fa-2x text-white"></i>
+        <h1 class="text-3xl font-bold text-white">MyService PRO</h1>
+      </div>
+      <p class="text-blue-100 text-lg">Conectando profesionales con clientes</p>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="p-8 space-y-8">
+      <!-- Selector de Rol -->
+      <div class="grid grid-cols-3 gap-6">
+        <button data-role="user" class="role-btn bg-blue-100 text-blue-800 ring-2 ring-blue-500">
+          <i class="fas fa-user fa-lg mb-3"></i>
+          <span class="font-medium">Usuario</span>
+        </button>
+        <button data-role="provider" class="role-btn bg-green-100 text-green-800">
+          <i class="fas fa-tools fa-lg mb-3"></i>
+          <span class="font-medium">Proveedor</span>
+        </button>
+        <button data-role="client" class="role-btn bg-purple-100 text-purple-800">
+          <i class="fas fa-building fa-lg mb-3"></i>
+          <span class="font-medium">Empresa</span>
+        </button>
+      </div>
+
+      <!-- Formulario de Login -->
+      <form id="loginForm" class="space-y-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Correo electrónico</label>
+          <div class="relative">
+            <input type="email" name="email" required
+                   class="auth-input peer pl-10"
+                   placeholder="nombre@ejemplo.com"
+                   autocomplete="email">
+            <i class="fas fa-envelope absolute left-3 top-3 text-gray-400 peer-focus:text-blue-500 transition-colors"></i>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+          <div class="relative">
+            <input type="password" name="password" required
+                   class="auth-input peer pl-10"
+                   placeholder="••••••••"
+                   autocomplete="current-password">
+            <i class="fas fa-lock absolute left-3 top-3 text-gray-400 peer-focus:text-blue-500 transition-colors"></i>
+          </div>
+        </div>
+
+        <button type="submit" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all flex items-center justify-center space-x-2 hover:shadow-lg transform hover:-translate-y-0.5">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Acceder a la plataforma</span>
+        </button>
+      </form>
+
+      <!-- OAuth Social -->
+      <div class="space-y-6">
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-4 bg-white text-gray-500 font-medium">o continúa con</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col space-y-4">
+          <a href="/auth/google" 
+             class="social-btn bg-red-600 hover:bg-red-700 px-6 py-3 text-base font-medium">
+            <i class="fab fa-google mr-3"></i>
+            <span>Continuar con Google</span>
+          </a>
+          <a href="/auth/facebook" 
+             class="social-btn bg-blue-800 hover:bg-blue-900 px-6 py-3 text-base font-medium">
+            <i class="fab fa-facebook-f mr-3"></i>
+            <span>Continuar con Facebook</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="bg-gray-50 p-6 text-center border-t border-gray-200">
+      <p class="text-gray-600">
+        ¿Nuevo en MyService? 
+        <a href="/register.html" class="text-blue-600 hover:text-blue-800 font-medium transition-colors">
+          Crea una cuenta
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Gestión de roles
+      const roleButtons = document.querySelectorAll('[data-role]');
+      let selectedRole = 'user';
+      
+      roleButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          selectedRole = btn.dataset.role;
+          roleButtons.forEach(b => b.classList.remove('ring-2', 'ring-blue-500'));
+          btn.classList.add('ring-2', 'ring-blue-500');
+        });
+      });
+
+      // Validación y envío del formulario
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = {
+          email: formData.get('email'),
+          password: formData.get('password'),
+          role: selectedRole
+        };
+
+        try {
+          const response = await fetch('/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.error || 'Error en la autenticación');
+          }
+          
+          // Login exitoso
+          alert('Login exitoso! Redirigiendo...');
+          window.location.href = result.redirectUrl;
+          
+        } catch (error) {
+          alert(`Error: ${error.message}`);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
