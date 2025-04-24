@@ -198,6 +198,29 @@
           <h2 class="text-2xl font-semibold mb-4 text-gray-900">Encuentra tu Proveedor de Servicios</h2>
           <div id="map" class="mb-6"></div>
           
+          <!-- Location Sharing Controls -->
+          <div class="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center space-x-2">
+                <i class="fas fa-map-marker-alt text-blue-600"></i>
+                <h3 class="text-lg font-medium text-gray-900">Compartir Ubicación</h3>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="locationSharingToggle" class="sr-only peer" onchange="toggleGlobalLocationSharing()">
+                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+              Controla quién puede ver tu ubicación. Solo los proveedores seleccionados podrán verla.
+            </p>
+            <div id="sharedProvidersContainer" class="space-y-2 hidden">
+              <h4 class="font-medium text-gray-700 mb-2">Proveedores con acceso a tu ubicación:</h4>
+              <div id="sharedProvidersList" class="space-y-2">
+                <!-- Shared providers will be listed here -->
+              </div>
+            </div>
+          </div>
+
           <h3 class="text-lg font-medium text-gray-900 mb-3">Selecciona el tipo de servicio</h3>
           
           <!-- Servicios Técnicos -->
@@ -759,9 +782,14 @@
     function createProviderCard(provider) {
       const distanceHtml = provider.distance ? 
         `<span class="text-sm text-gray-500"><i class="fas fa-map-marker-alt mr-1"></i>${provider.distance} km</span>` : '';
+      
+      const isShared = sharedProviders.has(provider.id);
+      const sharingBtnClass = isShared ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600';
+      const sharingIcon = isShared ? 'fa-eye' : 'fa-eye-slash';
+      const sharingText = isShared ? 'Ubicación compartida' : 'Compartir ubicación';
 
       return `
-        <div class="provider-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:border-blue-500 transition-colors duration-300 cursor-pointer" onclick="showProviderDetails(${provider.id})">
+        <div class="provider-card bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
@@ -945,10 +973,141 @@
       loadProviders(job, searchInput.value);
     });
 
+    // Location sharing functionality
+    let currentUserId = null; // Will be set after authentication
+    let globalLocationSharing = false;
+    let sharedProviders = new Set();
+
+    async function toggleGlobalLocationSharing() {
+      const toggle = document.getElementById('locationSharingToggle');
+      const container = document.getElementById('sharedProvidersContainer');
+      globalLocationSharing = toggle.checked;
+      
+      if (globalLocationSharing) {
+        container.classList.remove('hidden');
+        getUserLocation(); // Request location when sharing is enabled
+      } else {
+        container.classList.add('hidden');
+        if (userMarker) {
+          map.removeLayer(userMarker);
+          userMarker = null;
+        }
+      }
+    }
+
+    async function toggleProviderLocationSharing(providerId) {
+      if (!currentUserId) {
+        alert('Por favor inicia sesión para compartir tu ubicación');
+        return;
+      }
+
+      try {
+        const response = await fetch('/location-sharing/toggle', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: currentUserId,
+            provider_id: providerId,
+            is_shared: !sharedProviders.has(providerId)
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          if (data.is_shared) {
+            sharedProviders.add(providerId);
+          } else {
+            sharedProviders.delete(providerId);
+          }
+          updateSharedProvidersList();
+        }
+      } catch (error) {
+        console.error('Error toggling location sharing:', error);
+        alert('Error al actualizar las preferencias de ubicación');
+      }
+    }
+
+    function updateSharedProvidersList() {
+      const container = document.getElementById('sharedProvidersList');
+      container.innerHTML = '';
+
+      providers.forEach(provider => {
+        if (sharedProviders.has(provider.id)) {
+          const providerElement = document.createElement('div');
+          providerElement.className = 'flex items-center justify-between p-2 bg-gray-50 rounded-lg';
+          providerElement.innerHTML = `
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-user-circle text-gray-600"></i>
+              <span class="font-medium">${provider.name}</span>
+            </div>
+            <button onclick="toggleProviderLocationSharing(${provider.id})" 
+                    class="text-red-600 hover:text-red-800">
+              <i class="fas fa-times"></i>
+            </button>
+          `;
+          container.appendChild(providerElement);
+        }
+      });
+
+      if (container.children.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">No has compartido tu ubicación con ningún proveedor</p>';
+      }
+    }
+
+    // Update getUserLocation function to consider sharing preferences
+    function getUserLocation() {
+      if (!globalLocationSharing) {
+        return;
+      }
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            userLocation = [position.coords.latitude, position.coords.longitude];
+            
+            if (userMarker) {
+              map.removeLayer(userMarker);
+            }
+
+            userMarker = L.marker(userLocation, {
+              icon: L.divIcon({
+                className: 'user-marker',
+                html: '<div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><i class="fas fa-user text-white"></i></div>',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+              })
+            }).addTo(map);
+
+            userMarker.bindPopup('Tu ubicación actual').openPopup();
+            map.setView(userLocation, 14);
+            updateProvidersDistance();
+          },
+          (error) => {
+            console.error('Error getting location:', error);
+            alert('No se pudo obtener tu ubicación. Por favor verifica los permisos de ubicación.');
+          }
+        );
+      } else {
+        alert('Tu navegador no soporta geolocalización');
+      }
+    }
+
     // Initialize map and user menu on page load
     window.onload = () => {
       initMap();
       initUserMenu();
+      // Check for existing location sharing preferences
+      if (currentUserId) {
+        fetch(`/location-sharing/shared-with/${currentUserId}`)
+          .then(response => response.json())
+          .then(data => {
+            data.forEach(provider => sharedProviders.add(provider.id));
+            updateSharedProvidersList();
+          })
+          .catch(console.error);
+      }
     };
 
     // User menu functionality
