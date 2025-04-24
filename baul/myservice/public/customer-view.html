@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MyService PRO - Encuentra tu Proveedor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'inter': ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          }
+        },
+      },
+    }
+  </script>
+
+  <style>
+    .hidden { display: none; }
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .job-icon {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+    .job-icon:hover {
+      transform: translateY(-4px);
+    }
+    .job-icon.selected {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .provider-card {
+      transition: all 0.3s ease;
+    }
+    .provider-card:hover {
+      transform: translateY(-2px);
+    }
+    .scene-transition {
+      animation: fadeIn 0.5s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .provider-details {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      transform: translateY(100%);
+      transition: transform 0.3s ease-out;
+      z-index: 1000;
+    }
+    .provider-details.show {
+      transform: translateY(0);
+    }
+    .review-stars {
+      color: #FFD700;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-inter">
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md fixed w-full top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <i class="fas fa-handshake text-blue-600 text-2xl mr-2"></i>
+          <span class="text-xl font-bold text-gray-900">MyService PRO</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
+            <i class="fas fa-bell text-xl"></i>
+          </button>
+          <div class="relative group">
+            <button class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
+              <img class="h-8 w-8 rounded-full bg-gray-200 object-cover" src="https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff" alt="Profile">
+              <span class="font-medium">Mi Cuenta</span>
+              <i class="fas fa-chevron-down text-sm"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="pt-20 pb-8 px-4">
+    <div class="max-w-4xl mx-auto">
+      <!-- Scene 1: Contact Provider -->
+      <section id="scene1" class="scene scene-transition">
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <h2 class="text-2xl font-semibold mb-4 text-gray-900">Encuentra tu Proveedor de Servicios</h2>
+          <div id="map" class="mb-6"></div>
+          
+          <div class="mb-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-3">Selecciona el tipo de servicio</h3>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+              <div class="job-icon bg-blue-50 text-blue-600 text-center" title="Plomería">
+                <i class="fas fa-wrench text-2xl mb-2"></i>
+                <p class="text-sm">Plomería</p>
+              </div>
+              <div class="job-icon bg-green-50 text-green-600 text-center" title="Electricista">
+                <i class="fas fa-bolt text-2xl mb-2"></i>
+                <p class="text-sm">Electricista</p>
+              </div>
+              <div class="job-icon bg-yellow-50 text-yellow-600 text-center" title="Limpieza">
+                <i class="fas fa-broom text-2xl mb-2"></i>
+                <p class="text-sm">Limpieza</p>
+              </div>
+              <div class="job-icon bg-red-50 text-red-600 text-center" title="Jardinería">
+                <i class="fas fa-seedling text-2xl mb-2"></i>
+                <p class="text-sm">Jardinería</p>
+              </div>
+              <div class="job-icon bg-pink-50 text-pink-600 text-center" title="Niñera">
+                <i class="fas fa-baby text-2xl mb-2"></i>
+                <p class="text-sm">Niñera</p>
+              </div>
+              <div class="job-icon bg-purple-50 text-purple-600 text-center" title="Tutoría">
+                <i class="fas fa-book text-2xl mb-2"></i>
+                <p class="text-sm">Tutoría</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <div class="relative">
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Buscar proveedores por nombre o servicio..."
+                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pl-10 pr-4 py-3"
+              />
+              <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
+          <div id="providerList" class="space-y-4 mb-6">
+            <!-- Provider cards will be generated here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Provider Details Slide-up Panel -->
+      <div id="providerDetails" class="provider-details bg-white rounded-t-2xl shadow-lg p-6">
+        <div class="max-w-4xl mx-auto">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="text-xl font-semibold text-gray-900" id="providerName"></h3>
+              <p class="text-gray-600" id="providerJob"></p>
+            </div>
+            <button onclick="closeProviderDetails()" class="text-gray-500 hover:text-gray-700">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-6 mb-6">
+            <div>
+              <div class="flex items-center mb-2">
+                <div class="review-stars text-lg mr-2" id="providerRating"></div>
+                <span class="text-gray-600" id="providerReviewCount"></span>
+              </div>
+              <p class="text-2xl font-semibold text-blue-600 mb-2" id="providerPrice"></p>
+              <p class="text-gray-600" id="providerLocation"></p>
+            </div>
+            <div>
+              <h4 class="font-medium text-gray-900 mb-2">Horario de Atención</h4>
+              <p class="text-gray-600">Lunes a Viernes: 9:00 - 18:00</p>
+              <p class="text-gray-600">Sábados: 9:00 - 14:00</p>
+            </div>
+          </div>
+
+          <div class="border-t border-gray-200 pt-6 mb-6">
+            <h4 class="font-medium text-gray-900 mb-3">Servicios Ofrecidos</h4>
+            <div class="grid grid-cols-2 gap-4" id="providerServices">
+              <!-- Services will be populated here -->
+            </div>
+          </div>
+
+          <div class="flex space-x-4">
+            <button onclick="contactProvider()" class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center">
+              <i class="fas fa-comment-alt mr-2"></i>
+              Contactar
+            </button>
+            <button onclick="showDirections()" class="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors duration-300 flex items-center justify-center">
+              <i class="fas fa-directions mr-2"></i>
+              Cómo Llegar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script>
+    // Talca center coordinates
+    const TALCA_CENTER = [-35.4264, -71.6553];
+    
+    let map, userMarker, providerMarkers = [];
+    let selectedProvider = null;
+
+    // Providers data for Talca
+    const providers = [
+      {
+        id: 1,
+        name: "Juan Plomería Express",
+        job: "Plomería",
+        rating: 4.8,
+        reviews: 156,
+        price: "$15.000/hr",
+        lat: -35.4264,
+        lng: -71.6553,
+        location: "Centro de Talca",
+        services: ["Reparación de cañerías", "Instalación de grifería", "Detección de fugas", "Desagües"],
+        description: "Servicio profesional de plomería con más de 10 años de experiencia"
+      },
+      {
+        id: 2,
+        name: "Electricidad Moderna",
+        job: "Electricista",
+        rating: 4.9,
+        reviews: 203,
+        price: "$20.000/hr",
+        lat: -35.4280,
+        lng: -71.6570,
+        location: "Sector Plaza de Armas",
+        services: ["Instalaciones eléctricas", "Reparaciones", "Certificaciones SEC", "Domótica"],
+        description: "Electricistas certificados para todo tipo de instalaciones"
+      },
+      {
+        id: 3,
+        name: "Limpieza Total",
+        job: "Limpieza",
+        rating: 4.7,
+        reviews: 89,
+        lat: -35.4230,
+        lng: -71.6520,
+        location: "Sector Norte",
+        services: ["Limpieza de hogares", "Oficinas", "Tapicería", "Vidrios"],
+        description: "Servicio profesional de limpieza para hogares y oficinas"
+      }
+    ];
+
+    function initMap() {
+      map = L.map('map').setView(TALCA_CENTER, 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      loadProviders();
+    }
+
+    function createProviderCard(provider) {
+      return `
+        <div class="provider-card bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:border-blue-500 transition-colors duration-300 cursor-pointer" onclick="showProviderDetails(${provider.id})">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <i class="fas fa-user text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900">${provider.name}</h3>
+                <div class="flex items-center space-x-2 text-sm">
+                  <span class="text-yellow-500"><i class="fas fa-star"></i> ${provider.rating}</span>
+                  <span class="text-gray-500">${provider.reviews} reseñas</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="font-semibold text-blue-600">${provider.price}</p>
+              <p class="text-sm text-gray-500">${provider.job}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function loadProviders(filterJob = null, searchTerm = "") {
+      providerMarkers.forEach(marker => map.removeLayer(marker));
+      providerMarkers = [];
+      providerList.innerHTML = "";
+
+      const filteredProviders = providers.filter(p => {
+        const matchesJob = filterJob ? p.job === filterJob : true;
+        const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesJob && matchesSearch;
+      });
+
+      filteredProviders.forEach(p => {
+        const marker = L.marker([p.lat, p.lng])
+          .addTo(map)
+          .bindPopup(`
+            <div class="text-center">
+              <h3 class="font-semibold">${p.name}</h3>
+              <p class="text-sm">${p.job}</p>
+              <p class="text-sm text-yellow-500"><i class="fas fa-star"></i> ${p.rating}</p>
+            </div>
+          `);
+        
+        marker.on('click', () => showProviderDetails(p.id));
+        providerMarkers.push(marker);
+
+        const card = document.createElement('div');
+        card.innerHTML = createProviderCard(p);
+        providerList.appendChild(card);
+      });
+    }
+
+    function showProviderDetails(providerId) {
+      const provider = providers.find(p => p.id === providerId);
+      if (!provider) return;
+
+      selectedProvider = provider;
+      
+      // Update provider details panel
+      document.getElementById('providerName').textContent = provider.name;
+      document.getElementById('providerJob').textContent = provider.job;
+      document.getElementById('providerPrice').textContent = provider.price;
+      document.getElementById('providerLocation').textContent = provider.location;
+      
+      // Update rating stars
+      const ratingHtml = Array(5).fill().map((_, i) => 
+        `<i class="fas fa-star${i < Math.floor(provider.rating) ? '' : '-half-alt'}"></i>`
+      ).join('');
+      document.getElementById('providerRating').innerHTML = ratingHtml;
+      document.getElementById('providerReviewCount').textContent = `(${provider.reviews} reseñas)`;
+
+      // Update services
+      const servicesHtml = provider.services.map(service => 
+        `<div class="flex items-center space-x-2">
+          <i class="fas fa-check text-green-500"></i>
+          <span>${service}</span>
+        </div>`
+      ).join('');
+      document.getElementById('providerServices').innerHTML = servicesHtml;
+
+      // Show the panel
+      document.getElementById('providerDetails').classList.add('show');
+
+      // Center map on provider
+      map.setView([provider.lat, provider.lng], 15);
+    }
+
+    function closeProviderDetails() {
+      document.getElementById('providerDetails').classList.remove('show');
+      selectedProvider = null;
+      map.setView(TALCA_CENTER, 14);
+    }
+
+    function contactProvider() {
+      if (!selectedProvider) return;
+      alert(`Contactando a ${selectedProvider.name}...\nPróximamente: integración con sistema de mensajería`);
+    }
+
+    function showDirections() {
+      if (!selectedProvider) return;
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedProvider.lat},${selectedProvider.lng}`;
+      window.open(url, '_blank');
+    }
+
+    // Event Listeners
+    document.querySelectorAll('.job-icon').forEach(icon => {
+      icon.addEventListener('click', () => {
+        const job = icon.title;
+        document.querySelectorAll('.job-icon').forEach(i => i.classList.remove('selected', 'ring-2', 'ring-blue-500'));
+        if (selectedProvider?.job !== job) {
+          icon.classList.add('selected', 'ring-2', 'ring-blue-500');
+          loadProviders(job, searchInput.value);
+        } else {
+          loadProviders(null, searchInput.value);
+        }
+      });
+    });
+
+    searchInput.addEventListener('input', () => {
+      const selectedIcon = document.querySelector('.job-icon.selected');
+      const job = selectedIcon ? selectedIcon.title : null;
+      loadProviders(job, searchInput.value);
+    });
+
+    // Initialize map on page load
+    window.onload = () => {
+      initMap();
+    };
+  </script>
+</body>
+</html>
