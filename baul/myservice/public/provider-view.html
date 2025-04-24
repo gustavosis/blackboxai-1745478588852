@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyService PRO - Vista del Proveedor</title>
+    
+    <!-- Tailwind CSS + Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+
+    <style>
+        .card-hover {
+            transition: transform 0.2s ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen antialiased">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-handshake text-primary-600 text-2xl mr-2"></i>
+                    <span class="text-xl font-bold text-gray-900">MyService PRO</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
+                        </button>
+                    </div>
+                    <div class="relative group">
+                        <button class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
+                            <img class="h-8 w-8 rounded-full bg-gray-200 object-cover" src="https://ui-avatars.com/api/?name=John+Doe&background=0D8ABC&color=fff" alt="Profile">
+                            <span class="font-medium">John Doe</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden group-hover:block">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-user mr-2"></i> Mi Perfil
+                            </a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-cog mr-2"></i> Configuración
+                            </a>
+                            <hr class="my-2">
+                            <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto pt-20 pb-6 px-4 sm:px-6 lg:px-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:border-primary-500 transition-all duration-300 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Servicios Activos</h3>
+                    <div class="p-2 bg-primary-100 rounded-lg">
+                        <i class="fas fa-tools text-primary-600 text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold text-gray-900">12</p>
+                <div class="flex items-center text-sm text-green-600 mt-2">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    <span>+3 desde el último mes</span>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:border-primary-500 transition-all duration-300 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Ingresos</h3>
+                    <div class="p-2 bg-green-100 rounded-lg">
+                        <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold text-gray-900">$2,450</p>
+                <div class="flex items-center text-sm text-gray-500 mt-2">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    <span>Este mes</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:border-primary-500 transition-all duration-300 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Calificación</h3>
+                    <div class="p-2 bg-yellow-100 rounded-lg">
+                        <i class="fas fa-star text-yellow-500 text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold text-gray-900">4.8</p>
+                <div class="flex items-center text-sm text-gray-500 mt-2">
+                    <i class="fas fa-users mr-1"></i>
+                    <span>De 56 reseñas</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:border-primary-500 transition-all duration-300 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Clientes</h3>
+                    <div class="p-2 bg-blue-100 rounded-lg">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-3xl font-bold text-gray-900">89</p>
+                <div class="flex items-center text-sm text-gray-500 mt-2">
+                    <i class="fas fa-chart-line mr-1"></i>
+                    <span>Total acumulado</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Services & Calendar Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Recent Services -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-900">Servicios Recientes</h2>
+                        <button class="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200">
+                            Ver todos
+                        </button>
+                    </div>
+                    <div class="divide-y divide-gray-100">
+                        <div class="p-6 hover:bg-gray-50 transition-all duration-300">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
+                                        <i class="fas fa-wrench text-primary-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Reparación de Plomería</h3>
+                                        <p class="text-sm text-gray-500">Cliente: María González</p>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
+                                    Completado
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Calle Principal #123</span>
+                                </div>
+                                <span>Hace 2 horas</span>
+                            </div>
+                        </div>
+
+                        <div class="p-6 hover:bg-gray-50 transition-all duration-300">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-paint-roller text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Pintura Interior</h3>
+                                        <p class="text-sm text-gray-500">Cliente: Carlos Ruiz</p>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-full">
+                                    En Progreso
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Av. Libertador #456</span>
+                                </div>
+                                <span>Hace 1 día</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar & Upcoming -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+                    <div class="p-6 border-b border-gray-100">
+                        <h2 class="text-xl font-semibold text-gray-900">Próximos Servicios</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-6">
+                            <div class="flex items-center space-x-4 fade-in">
+                                <div class="w-14 h-14 flex-shrink-0 rounded-xl bg-primary-100 flex flex-col items-center justify-center">
+                                    <span class="text-primary-600 font-semibold">15</span>
+                                    <span class="text-primary-600 text-sm">MAY</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Instalación Eléctrica</h4>
+                                    <p class="text-sm text-gray-500">9:00 AM - 11:00 AM</p>
+                                    <div class="flex items-center mt-1 text-sm text-gray-500">
+                                        <i class="fas fa-map-marker-alt mr-1"></i>
+                                        <span>Av. Principal #789</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center space-x-4 fade-in" style="animation-delay: 0.2s">
+                                <div class="w-14 h-14 flex-shrink-0 rounded-xl bg-primary-100 flex flex-col items-center justify-center">
+                                    <span class="text-primary-600 font-semibold">16</span>
+                                    <span class="text-primary-600 text-sm">MAY</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900">Mantenimiento AC</h4>
+                                    <p class="text-sm text-gray-500">2:00 PM - 4:00 PM</p>
+                                    <div class="flex items-center mt-1 text-sm text-gray-500">
+                                        <i class="fas fa-map-marker-alt mr-1"></i>
+                                        <span>Calle 5ta #234</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-50 border-t border-gray-100">
+                        <button class="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-calendar-plus mr-2"></i>
+                            Agendar Nuevo Servicio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animación para las tarjetas de estadísticas
+            const cards = document.querySelectorAll('.card-hover');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.classList.add('fade-in');
+            });
+        });
+    </script>
+</body>
+</html>
