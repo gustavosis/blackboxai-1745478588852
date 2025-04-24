@@ -76,7 +76,12 @@ db.serialize(() => {
   )`);
 
   // Add location visibility to service_requests if not exists
-  db.run(`ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS location_visible BOOLEAN DEFAULT 0`);
+  // Check if column exists before adding it
+  db.get("SELECT * FROM pragma_table_info('service_requests') WHERE name='location_visible'", (err, row) => {
+    if (!row) {
+      db.run(`ALTER TABLE service_requests ADD COLUMN location_visible BOOLEAN DEFAULT 0`);
+    }
+  });
 });
 
 // Routes
@@ -88,6 +93,11 @@ app.use('/service-requests', require('./server/routes/service-requests'));
 // Serve index.html on root route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Serve provider-view.html
+app.get('/provider-view.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'provider-view.html'));
 });
 
 // Start server
