@@ -32,9 +32,16 @@ module.exports = (app) => {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Serve static files - make sure public directory is served first
-  app.use(express.static(path.join(__dirname, '../../public')));
+  // Serve static files
+  app.use('/', express.static(path.join(__dirname, '../../public')));
   app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+
+  // Enable CORS
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+  });
 
   // Handle direct HTML file requests
   app.get('/register.html', (req, res) => {
