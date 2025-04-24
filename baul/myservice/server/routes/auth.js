@@ -196,9 +196,15 @@ router.get('/facebook/callback',
 );
 
 // Logout route
-router.get('/logout', (req, res) => {
-  req.logout();
-  res.redirect('/login?message=logged_out');
+router.get('/logout', (req, res, next) => {
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    req.session.destroy(function(err) {
+      if (err) { return next(err); }
+      res.clearCookie('connect.sid');
+      res.redirect('/?message=logged_out');
+    });
+  });
 });
 
 module.exports = router;
