@@ -110,7 +110,7 @@
                                     <i class="fas fa-question-circle w-5 mr-3"></i>
                                     Ayuda y Soporte
                                 </a>
-                                <button onclick="handleLogout()" class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100">
+                                <button onclick="handleLogout()" class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer">
                                     <i class="fas fa-sign-out-alt w-5 mr-3"></i>
                                     Cerrar Sesión
                                 </button>
@@ -416,6 +416,11 @@
                 // Show map container with animation
                 mapContainer.classList.remove('hidden');
                 mapContainer.classList.add('fade-in');
+
+                // Invalidate map size to fix rendering issue
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 200);
 
                 // Add popup to provider marker
                 providerMarker.bindPopup('Tu ubicación actual').openPopup();
