@@ -9,30 +9,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Iconos -->
+    <!-- Iconos y Leaflet -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        'primary': {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                        }
-                    }
-                },
-            },
-        }
-    </script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
 
     <style>
         .card-hover {
@@ -48,41 +27,94 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 320px;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            animation: slideDown 0.2s ease-out;
+        }
+        .profile-dropdown.show {
+            display: block;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="font-inter bg-gray-50 min-h-screen antialiased">
     <!-- Navbar -->
-    <nav class="bg-white shadow-md fixed w-full top-0 z-50">
+    <nav class="bg-white shadow-sm fixed w-full z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <i class="fas fa-handshake text-primary-600 text-2xl mr-2"></i>
-                    <span class="text-xl font-bold text-gray-900">MyService PRO</span>
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-handshake text-blue-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-semibold text-gray-900">MyService PRO</span>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <button class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
-                            <i class="fas fa-bell text-xl"></i>
-                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">3</span>
-                        </button>
-                    </div>
-                    <div class="relative group">
-                        <button class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
-                            <img class="h-8 w-8 rounded-full bg-gray-200 object-cover" src="https://ui-avatars.com/api/?name=John+Doe&background=0D8ABC&color=fff" alt="Profile">
-                            <span class="font-medium">John Doe</span>
+                    <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bell text-xl"></i>
+                    </button>
+                    <div class="relative" id="userMenuContainer">
+                        <button id="userMenuButton" 
+                                class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
+                            <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=Provider&background=0D8ABC&color=fff" alt="Provider">
+                            <span class="font-medium">Mi Perfil</span>
                             <i class="fas fa-chevron-down text-sm"></i>
                         </button>
-                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden group-hover:block">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-user mr-2"></i> Mi Perfil
-                            </a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-cog mr-2"></i> Configuración
-                            </a>
-                            <hr class="my-2">
-                            <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
-                            </a>
+                        <!-- Profile Dropdown -->
+                        <div id="profileDropdown" class="profile-dropdown">
+                            <div class="p-4 border-b border-gray-200">
+                                <div class="flex items-center space-x-3">
+                                    <img class="h-12 w-12 rounded-full" src="https://ui-avatars.com/api/?name=Provider&background=0D8ABC&color=fff" alt="Provider">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">Juan Pérez</h3>
+                                        <p class="text-sm text-gray-600">Electricista</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="py-2">
+                                <a href="#perfil" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user-circle w-5 mr-3"></i>
+                                    Editar Perfil
+                                </a>
+                                <a href="#cuenta" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-cog w-5 mr-3"></i>
+                                    Ajustes de Cuenta
+                                </a>
+                                <a href="#documentos" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-file-alt w-5 mr-3"></i>
+                                    Documentos
+                                </a>
+                                <a href="#pagos" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-credit-card w-5 mr-3"></i>
+                                    Pagos
+                                </a>
+                                <hr class="my-2 border-gray-200">
+                                <a href="#ayuda" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-question-circle w-5 mr-3"></i>
+                                    Ayuda y Soporte
+                                </a>
+                                <button onclick="handleLogout()" class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100">
+                                    <i class="fas fa-sign-out-alt w-5 mr-3"></i>
+                                    Cerrar Sesión
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -90,188 +122,495 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <main class="max-w-7xl mx-auto pt-20 pb-6 px-4 sm:px-6 lg:px-8">
-        <!-- Stats Cards -->
+        <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:border-primary-500 transition-all duration-300 card-hover">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Servicios Activos</h3>
-                    <div class="p-2 bg-primary-100 rounded-lg">
-                        <i class="fas fa-tools text-primary-600 text-xl"></i>
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Servicios Completados</p>
+                        <h3 class="text-2xl font-bold text-gray-900 mt-1">24</h3>
+                    </div>
+                    <div class="bg-blue-100 rounded-full p-3">
+                        <i class="fas fa-check-circle text-blue-600 text-xl"></i>
                     </div>
                 </div>
-                <p class="text-3xl font-bold text-gray-900">12</p>
-                <div class="flex items-center text-sm text-green-600 mt-2">
-                    <i class="fas fa-arrow-up mr-1"></i>
-                    <span>+3 desde el último mes</span>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:border-primary-500 transition-all duration-300 card-hover">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Ingresos</h3>
-                    <div class="p-2 bg-green-100 rounded-lg">
-                        <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-3xl font-bold text-gray-900">$2,450</p>
-                <div class="flex items-center text-sm text-gray-500 mt-2">
-                    <i class="fas fa-calendar-alt mr-1"></i>
-                    <span>Este mes</span>
+                <div class="mt-4">
+                    <span class="text-green-500 text-sm font-medium">
+                        <i class="fas fa-arrow-up mr-1"></i>
+                        12% más que el mes pasado
+                    </span>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:border-primary-500 transition-all duration-300 card-hover">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Calificación</h3>
-                    <div class="p-2 bg-yellow-100 rounded-lg">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Calificación Promedio</p>
+                        <h3 class="text-2xl font-bold text-gray-900 mt-1">4.8</h3>
+                    </div>
+                    <div class="bg-yellow-100 rounded-full p-3">
                         <i class="fas fa-star text-yellow-500 text-xl"></i>
                     </div>
                 </div>
-                <p class="text-3xl font-bold text-gray-900">4.8</p>
-                <div class="flex items-center text-sm text-gray-500 mt-2">
-                    <i class="fas fa-users mr-1"></i>
-                    <span>De 56 reseñas</span>
+                <div class="mt-4">
+                    <div class="flex items-center text-yellow-500">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:border-primary-500 transition-all duration-300 card-hover">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Clientes</h3>
-                    <div class="p-2 bg-blue-100 rounded-lg">
-                        <i class="fas fa-users text-blue-600 text-xl"></i>
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Ingresos del Mes</p>
+                        <h3 class="text-2xl font-bold text-gray-900 mt-1">$2,450</h3>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-3">
+                        <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
                     </div>
                 </div>
-                <p class="text-3xl font-bold text-gray-900">89</p>
-                <div class="flex items-center text-sm text-gray-500 mt-2">
-                    <i class="fas fa-chart-line mr-1"></i>
-                    <span>Total acumulado</span>
+                <div class="mt-4">
+                    <span class="text-green-500 text-sm font-medium">
+                        <i class="fas fa-arrow-up mr-1"></i>
+                        8% más que el mes pasado
+                    </span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Solicitudes Pendientes</p>
+                        <h3 class="text-2xl font-bold text-gray-900 mt-1">3</h3>
+                    </div>
+                    <div class="bg-purple-100 rounded-full p-3">
+                        <i class="fas fa-clock text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <span class="text-purple-500 text-sm font-medium">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Requieren atención
+                    </span>
                 </div>
             </div>
         </div>
 
-        <!-- Recent Services & Calendar Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Recent Services -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                        <h2 class="text-xl font-semibold text-gray-900">Servicios Recientes</h2>
-                        <button class="text-primary-600 hover:text-primary-700 font-medium transition-colors duration-200">
-                            Ver todos
-                        </button>
-                    </div>
-                    <div class="divide-y divide-gray-100">
-                        <div class="p-6 hover:bg-gray-50 transition-all duration-300">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center">
-                                        <i class="fas fa-wrench text-primary-600"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-semibold text-gray-900">Reparación de Plomería</h3>
-                                        <p class="text-sm text-gray-500">Cliente: María González</p>
-                                    </div>
-                                </div>
-                                <span class="px-3 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-full">
-                                    Completado
-                                </span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm text-gray-500">
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>Calle Principal #123</span>
-                                </div>
-                                <span>Hace 2 horas</span>
-                            </div>
-                        </div>
-
-                        <div class="p-6 hover:bg-gray-50 transition-all duration-300">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                                        <i class="fas fa-paint-roller text-blue-600"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-semibold text-gray-900">Pintura Interior</h3>
-                                        <p class="text-sm text-gray-500">Cliente: Carlos Ruiz</p>
-                                    </div>
-                                </div>
-                                <span class="px-3 py-1 text-sm font-medium text-yellow-700 bg-yellow-100 rounded-full">
-                                    En Progreso
-                                </span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm text-gray-500">
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>Av. Libertador #456</span>
-                                </div>
-                                <span>Hace 1 día</span>
-                            </div>
-                        </div>
+        <!-- Map Section -->
+        <div class="mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hidden" id="mapContainer">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Mi Ubicación y Clientes</h2>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-green-600">
+                            <i class="fas fa-circle text-xs mr-1"></i>
+                            Ubicación compartida
+                        </span>
                     </div>
                 </div>
+                <div id="map"></div>
+                <div class="mt-4 text-sm text-gray-600">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Los clientes cercanos aparecerán en el mapa cuando soliciten servicios.
+                </div>
             </div>
+        </div>
 
-            <!-- Calendar & Upcoming -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div class="p-6 border-b border-gray-100">
-                        <h2 class="text-xl font-semibold text-gray-900">Próximos Servicios</h2>
-                    </div>
-                    <div class="p-6">
-                        <div class="space-y-6">
-                            <div class="flex items-center space-x-4 fade-in">
-                                <div class="w-14 h-14 flex-shrink-0 rounded-xl bg-primary-100 flex flex-col items-center justify-center">
-                                    <span class="text-primary-600 font-semibold">15</span>
-                                    <span class="text-primary-600 text-sm">MAY</span>
+        <!-- Service Requests Section -->
+        <div class="mb-8">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Solicitudes de Servicio</h2>
+                    <div class="space-y-6">
+                        <!-- Request 1 -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-4">
+                                <div class="bg-blue-100 rounded-full p-3">
+                                    <i class="fas fa-tools text-blue-600"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-medium text-gray-900">Instalación Eléctrica</h4>
-                                    <p class="text-sm text-gray-500">9:00 AM - 11:00 AM</p>
-                                    <div class="flex items-center mt-1 text-sm text-gray-500">
-                                        <i class="fas fa-map-marker-alt mr-1"></i>
-                                        <span>Av. Principal #789</span>
-                                    </div>
+                                    <h3 class="font-medium text-gray-900">Reparación Urgente</h3>
+                                    <p class="text-sm text-gray-500">Hace 5 minutos • 2.3 km</p>
                                 </div>
                             </div>
-
-                            <div class="flex items-center space-x-4 fade-in" style="animation-delay: 0.2s">
-                                <div class="w-14 h-14 flex-shrink-0 rounded-xl bg-primary-100 flex flex-col items-center justify-center">
-                                    <span class="text-primary-600 font-semibold">16</span>
-                                    <span class="text-primary-600 text-sm">MAY</span>
-                                </div>
-                                <div>
-                                    <h4 class="font-medium text-gray-900">Mantenimiento AC</h4>
-                                    <p class="text-sm text-gray-500">2:00 PM - 4:00 PM</p>
-                                    <div class="flex items-center mt-1 text-sm text-gray-500">
-                                        <i class="fas fa-map-marker-alt mr-1"></i>
-                                        <span>Calle 5ta #234</span>
-                                    </div>
-                                </div>
+                            <div class="flex space-x-2">
+                                <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                                    Aceptar
+                                </button>
+                                <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                                    Rechazar
+                                </button>
                             </div>
                         </div>
-                    </div>
-                    <div class="p-4 bg-gray-50 border-t border-gray-100">
-                        <button class="w-full py-2 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200 flex items-center justify-center">
-                            <i class="fas fa-calendar-plus mr-2"></i>
-                            Agendar Nuevo Servicio
-                        </button>
+
+                        <!-- Request 2 -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-4">
+                                <div class="bg-yellow-100 rounded-full p-3">
+                                    <i class="fas fa-bolt text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium text-gray-900">Instalación Eléctrica</h3>
+                                    <p class="text-sm text-gray-500">Hace 15 minutos • 1.5 km</p>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                                    Aceptar
+                                </button>
+                                <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                                    Rechazar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Animación para las tarjetas de estadísticas
-            const cards = document.querySelectorAll('.card-hover');
-            cards.forEach((card, index) => {
-                card.style.animationDelay = `${index * 0.1}s`;
-                card.classList.add('fade-in');
+        // Development mode flag
+        const isDevelopment = true;
+
+        // Map and location functionality
+        let map = null;
+        let providerMarker = null;
+        const TALCA_CENTER = [-35.4264, -71.6553];
+        let mapInitialized = false;
+
+        // Mock location for testing
+        const useMockLocation = true;
+        const mockLocation = {
+            coords: {
+                latitude: -35.4264,
+                longitude: -71.6553,
+                accuracy: 10
+            }
+        };
+
+        function showLocationPrompt() {
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            overlay.innerHTML = `
+                <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <h3 class="text-xl font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
+                        Ubicación Requerida
+                    </h3>
+                    <p class="text-gray-600 mb-6">
+                        Para poder ver el mapa y conectarte con clientes cercanos, necesitamos acceso a tu ubicación.
+                    </p>
+                    <button onclick="requestLocation()" 
+                            class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center">
+                        <i class="fas fa-location-arrow mr-2"></i>
+                        Compartir Mi Ubicación
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function initMap(location = TALCA_CENTER) {
+            console.log('Initializing map with location:', location);
+            
+            try {
+                if (map) {
+                    console.log('Removing existing map');
+                    map.remove();
+                }
+
+                const mapContainer = document.getElementById('map');
+                if (!mapContainer) {
+                    throw new Error('Map container not found');
+                }
+
+                console.log('Creating new map instance');
+                map = L.map('map').setView(location, 14);
+                
+                console.log('Adding tile layer');
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+
+                console.log('Adding provider marker');
+                providerMarker = L.marker(location, {
+                    icon: L.divIcon({
+                        className: 'provider-marker',
+                        html: '<div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><i class="fas fa-user text-white"></i></div>',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
+                    })
+                }).addTo(map);
+
+                mapInitialized = true;
+                console.log('Map initialization complete');
+                return true;
+            } catch (error) {
+                console.error('Error initializing map:', error);
+                showNotification('Error al inicializar el mapa: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        function requestLocation() {
+            console.log('Requesting location...');
+            
+            if (useMockLocation) {
+                console.log('Using mock location');
+                handleLocationSuccess(mockLocation);
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                console.error('Geolocation is not supported');
+                showNotification('Tu navegador no soporta geolocalización', 'error');
+                return;
+            }
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            };
+
+            navigator.geolocation.getCurrentPosition(handleLocationSuccess, handleLocationError, options);
+        }
+
+        async function handleLocationSuccess(position) {
+            try {
+                console.log('Location received:', position.coords);
+                
+                // Remove overlay if exists
+                const overlay = document.querySelector('.fixed.inset-0');
+                if (overlay) {
+                    overlay.remove();
+                }
+
+                const providerLocation = [position.coords.latitude, position.coords.longitude];
+                console.log('Provider location:', providerLocation);
+
+                // Show the map container
+                const mapContainer = document.getElementById('mapContainer');
+                if (!mapContainer) {
+                    throw new Error('Map container not found!');
+                }
+
+                // Initialize or update map
+                if (!mapInitialized) {
+                    if (!initMap(providerLocation)) {
+                        throw new Error('Failed to initialize map');
+                    }
+                } else {
+                    map.setView(providerLocation, 14);
+                    providerMarker.setLatLng(providerLocation);
+                }
+
+                // Show map container with animation
+                mapContainer.classList.remove('hidden');
+                mapContainer.classList.add('fade-in');
+
+                // Add popup to provider marker
+                providerMarker.bindPopup('Tu ubicación actual').openPopup();
+
+                // Save provider location to server
+                console.log('Updating provider location on server...');
+                await updateProviderLocation(providerLocation);
+
+                // Show success message
+                showNotification('Ubicación compartida correctamente');
+
+                // Load nearby clients
+                console.log('Loading nearby clients...');
+                await loadNearbyClients(providerLocation);
+
+            } catch (error) {
+                console.error('Error in location handling:', error);
+                showNotification('Error al compartir ubicación: ' + error.message, 'error');
+            }
+        }
+
+        function handleLocationError(error) {
+            console.error('Geolocation error:', error);
+            let errorMsg = 'Error al obtener ubicación: ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg += 'Permiso denegado. Por favor habilita el acceso a la ubicación.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg += 'Ubicación no disponible.';
+                    break;
+                case error.TIMEOUT:
+                    errorMsg += 'Tiempo de espera agotado.';
+                    break;
+                default:
+                    errorMsg += error.message;
+            }
+            showNotification(errorMsg, 'error');
+        }
+
+        async function updateProviderLocation(location) {
+            try {
+                if (isDevelopment) {
+                    console.log('Development mode: Simulating location update success');
+                    return true;
+                }
+
+                const response = await fetch('/api/provider/location', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        latitude: location[0],
+                        longitude: location[1]
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error al actualizar ubicación');
+                }
+                
+                return true;
+            } catch (error) {
+                if (isDevelopment) {
+                    console.warn('Development mode: Ignoring server error:', error);
+                    return true;
+                }
+                console.error('Error:', error);
+                throw error;
+            }
+        }
+
+        async function loadNearbyClients(location) {
+            try {
+                if (isDevelopment) {
+                    console.log('Development mode: Loading mock nearby clients');
+                    const mockClients = [
+                        {
+                            latitude: location[0] + 0.002,
+                            longitude: location[1] + 0.002,
+                            name: 'Cliente Cercano 1',
+                            distance: 0.5
+                        },
+                        {
+                            latitude: location[0] - 0.001,
+                            longitude: location[1] + 0.001,
+                            name: 'Cliente Cercano 2',
+                            distance: 0.3
+                        }
+                    ];
+                    
+                    mockClients.forEach(client => {
+                        L.marker([client.latitude, client.longitude], {
+                            icon: L.divIcon({
+                                className: 'client-marker',
+                                html: '<div class="w-8 h-8 bg-green-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><i class="fas fa-user text-white"></i></div>',
+                                iconSize: [32, 32],
+                                iconAnchor: [16, 16]
+                            })
+                        })
+                        .addTo(map)
+                        .bindPopup(`
+                            <div class="text-center">
+                                <h3 class="font-semibold">${client.name}</h3>
+                                <p class="text-sm text-gray-600">${client.distance.toFixed(1)} km</p>
+                            </div>
+                        `);
+                    });
+                    return;
+                }
+
+                const response = await fetch(`/api/provider/nearby-clients?lat=${location[0]}&lng=${location[1]}`);
+                const clients = await response.json();
+                
+                clients.forEach(client => {
+                    L.marker([client.latitude, client.longitude], {
+                        icon: L.divIcon({
+                            className: 'client-marker',
+                            html: '<div class="w-8 h-8 bg-green-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><i class="fas fa-user text-white"></i></div>',
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16]
+                        })
+                    })
+                    .addTo(map)
+                    .bindPopup(`
+                        <div class="text-center">
+                            <h3 class="font-semibold">${client.name}</h3>
+                            <p class="text-sm text-gray-600">${client.distance.toFixed(1)} km</p>
+                        </div>
+                    `);
+                });
+                
+            } catch (error) {
+                if (isDevelopment) {
+                    console.warn('Development mode: Ignoring server error:', error);
+                    return;
+                }
+                console.error('Error loading nearby clients:', error);
+                throw error;
+            }
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            notification.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500 flex items-center space-x-2`;
+            
+            const icon = document.createElement('i');
+            icon.className = `fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`;
+            notification.appendChild(icon);
+            
+            const text = document.createElement('span');
+            text.textContent = message;
+            notification.appendChild(text);
+            
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+
+        // Profile Dropdown Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const userMenuButton = document.getElementById('userMenuButton');
+            const profileDropdown = document.getElementById('profileDropdown');
+            
+            userMenuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileDropdown.classList.toggle('show');
             });
+
+            document.addEventListener('click', function(e) {
+                if (!profileDropdown.contains(e.target) && !userMenuButton.contains(e.target)) {
+                    profileDropdown.classList.remove('show');
+                }
+            });
+
+            // Handle profile menu items
+            document.querySelectorAll('#profileDropdown a').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    if (this.getAttribute('href') === '/auth/logout') {
+                        e.preventDefault();
+                        if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+                            window.location.href = '/auth/logout';
+                        }
+                    }
+                });
+            });
+
+            // Initialize map
+            console.log('DOM loaded, showing location prompt...');
+            showLocationPrompt();
         });
     </script>
 </body>
