@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+<!-- Previous head content remains the same until the style section -->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -72,6 +73,47 @@
     }
     .review-stars {
       color: #FFD700;
+    }
+    .chat-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1050;
+    }
+    .chat-modal.show {
+      display: flex;
+    }
+    .chat-container {
+      height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .message {
+      max-width: 80%;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      border-radius: 1rem;
+    }
+    .message.sent {
+      margin-left: auto;
+      background-color: #3B82F6;
+      color: white;
+      border-bottom-right-radius: 0.25rem;
+    }
+    .message.received {
+      margin-right: auto;
+      background-color: #E5E7EB;
+      color: black;
+      border-bottom-left-radius: 0.25rem;
     }
   </style>
 </head>
@@ -205,6 +247,53 @@
           </div>
         </div>
       </div>
+
+      <!-- Chat Modal -->
+      <div id="chatModal" class="chat-modal">
+        <div class="max-w-2xl w-full mx-auto my-8 bg-white rounded-xl shadow-2xl overflow-hidden">
+          <div class="chat-container">
+            <!-- Chat Header -->
+            <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                  <i class="fas fa-user text-blue-600"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold" id="chatProviderName">Nombre del Proveedor</h3>
+                  <p class="text-sm text-blue-100" id="chatProviderJob">Servicio</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-4">
+                <a href="#" id="whatsappLink" target="_blank" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200">
+                  <i class="fab fa-whatsapp text-xl"></i>
+                  <span>WhatsApp</span>
+                </a>
+                <button onclick="closeChatModal()" class="text-white hover:text-gray-200 transition-colors duration-200">
+                  <i class="fas fa-times text-xl"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+              <!-- Messages will be added here -->
+            </div>
+
+            <!-- Chat Input -->
+            <div class="border-t border-gray-200 p-4 bg-white">
+              <form id="chatForm" class="flex space-x-4">
+                <input type="text" id="messageInput" 
+                       class="flex-1 rounded-lg border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="Escribe tu mensaje...">
+                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2">
+                  <i class="fas fa-paper-plane"></i>
+                  <span>Enviar</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -228,6 +317,7 @@
         lat: -35.4264,
         lng: -71.6553,
         location: "Centro de Talca",
+        phone: "56920277599", // Example phone number
         services: ["Reparación de cañerías", "Instalación de grifería", "Detección de fugas", "Desagües"],
         description: "Servicio profesional de plomería con más de 10 años de experiencia"
       },
@@ -241,6 +331,7 @@
         lat: -35.4280,
         lng: -71.6570,
         location: "Sector Plaza de Armas",
+        phone: "56920277598", // Example phone number
         services: ["Instalaciones eléctricas", "Reparaciones", "Certificaciones SEC", "Domótica"],
         description: "Electricistas certificados para todo tipo de instalaciones"
       },
@@ -253,6 +344,7 @@
         lat: -35.4230,
         lng: -71.6520,
         location: "Sector Norte",
+        phone: "56920277597", // Example phone number
         services: ["Limpieza de hogares", "Oficinas", "Tapicería", "Vidrios"],
         description: "Servicio profesional de limpieza para hogares y oficinas"
       }
@@ -367,8 +459,65 @@
 
     function contactProvider() {
       if (!selectedProvider) return;
-      alert(`Contactando a ${selectedProvider.name}...\nPróximamente: integración con sistema de mensajería`);
+      
+      // Update chat modal with provider info
+      document.getElementById('chatProviderName').textContent = selectedProvider.name;
+      document.getElementById('chatProviderJob').textContent = selectedProvider.job;
+      
+      // Update WhatsApp link
+      document.getElementById('whatsappLink').href = `https://wa.me/${selectedProvider.phone}`;
+      
+      // Show welcome message
+      const chatMessages = document.getElementById('chatMessages');
+      chatMessages.innerHTML = `
+        <div class="message received">
+          <p class="font-medium mb-1">${selectedProvider.name}</p>
+          <p>¡Hola! ¿En qué puedo ayudarte?</p>
+        </div>
+      `;
+      
+      // Show chat modal
+      document.getElementById('chatModal').classList.add('show');
     }
+
+    function closeChatModal() {
+      document.getElementById('chatModal').classList.remove('show');
+    }
+
+    // Handle chat form submission
+    document.getElementById('chatForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+      
+      if (!message) return;
+      
+      const chatMessages = document.getElementById('chatMessages');
+      
+      // Add user message
+      chatMessages.innerHTML += `
+        <div class="message sent">
+          <p>${message}</p>
+        </div>
+      `;
+      
+      // Clear input
+      input.value = '';
+      
+      // Scroll to bottom
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+      // Simulate provider response after 1 second
+      setTimeout(() => {
+        chatMessages.innerHTML += `
+          <div class="message received">
+            <p class="font-medium mb-1">${selectedProvider.name}</p>
+            <p>Gracias por tu mensaje. Te responderé lo antes posible. También puedes contactarme por WhatsApp para una respuesta más rápida.</p>
+          </div>
+        `;
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 1000);
+    });
 
     function showDirections() {
       if (!selectedProvider) return;
