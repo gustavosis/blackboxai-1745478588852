@@ -62,10 +62,26 @@ db.serialize(() => {
     uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(provider_id) REFERENCES providers(id)
   )`);
+
+  // Create location_sharing table
+  db.run(`CREATE TABLE IF NOT EXISTS location_sharing (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    provider_id INTEGER NOT NULL,
+    is_shared BOOLEAN DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (provider_id) REFERENCES providers(id)
+  )`);
+
+  // Add location visibility to service_requests if not exists
+  db.run(`ALTER TABLE service_requests ADD COLUMN IF NOT EXISTS location_visible BOOLEAN DEFAULT 0`);
 });
 
 // Routes
 app.use('/auth', require('./server/routes/auth'));
+app.use('/location-sharing', require('./server/routes/location-sharing'));
 app.use('/providers', require('./server/routes/providers'));
 app.use('/service-requests', require('./server/routes/service-requests'));
 
