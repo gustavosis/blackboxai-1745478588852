@@ -1,30 +1,24 @@
-// User data management
 function loadUserData() {
-    // For testing, let's add some sample data if none exists
-    if (!localStorage.getItem('userData')) {
-        const testData = {
-            name: 'Juan Pérez',
-            service: 'Electricista',
-            profileImage: null,
-            stats: {
-                completedServices: 0,
-                averageRating: 0,
-                monthlyEarnings: 0,
-                pendingRequests: 0,
-                totalServices: 0
-            }
-        };
-        localStorage.setItem('userData', JSON.stringify(testData));
-    }
-
-    const userData = JSON.parse(localStorage.getItem('userData'));
+    const userData = JSON.parse(localStorage.getItem('userData')) || {
+        name: 'Usuario',
+        lastname: '',
+        service: '',
+        profileImage: null,
+        stats: {
+            completedServices: 0,
+            averageRating: 0,
+            monthlyEarnings: 0,
+            pendingRequests: 0,
+            totalServices: 0
+        }
+    };
 
     // Update profile in menu
-    document.getElementById('userMenuName').textContent = userData.name;
+    document.getElementById('userMenuName').textContent = userData.name + (userData.lastname ? ' ' + userData.lastname : '');
     document.getElementById('userMenuService').textContent = userData.service;
     
     // Update profile in dropdown
-    document.getElementById('userProfileName').textContent = userData.name;
+    document.getElementById('userProfileName').textContent = userData.name + (userData.lastname ? ' ' + userData.lastname : '');
     document.getElementById('userProfileRole').textContent = userData.service;
     
     // Update profile images
@@ -35,7 +29,7 @@ function loadUserData() {
             if (userData.profileImage) {
                 img.src = userData.profileImage;
             } else {
-                img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name)}&background=0D8ABC&color=fff`;
+                img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name + ' ' + userData.lastname)}&background=0D8ABC&color=fff`;
             }
         }
     });
