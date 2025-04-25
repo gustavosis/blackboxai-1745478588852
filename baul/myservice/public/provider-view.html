@@ -221,32 +221,152 @@
             </div>
         </div>
 
-        <!-- Service Requests Section -->
-        <div class="mb-8">
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-                <div class="p-6">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Solicitudes de Servicio</h2>
-                    <div class="space-y-6">
-                        <!-- Request 1 -->
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-4">
-                                <div class="bg-blue-100 rounded-full p-3">
-                                    <i class="fas fa-tools text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-medium text-gray-900">Reparación Urgente</h3>
-                                    <p class="text-sm text-gray-500">Hace 5 minutos • 2.3 km</p>
-                                </div>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-                                    Aceptar
-                                </button>
-                                <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                                    Rechazar
-                                </button>
-                            </div>
+    <!-- Service Requests Section -->
+    <div class="mb-8">
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+            <div class="p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Solicitudes de Servicio</h2>
+                <div class="space-y-6" id="serviceRequestsContainer">
+                    <!-- Service requests will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div id="chatModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+            <button id="closeChatBtn" class="absolute top-4 right-4 text-gray-600 hover:text-gray-900">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+            <h3 class="text-xl font-semibold mb-4">Chat con Cliente</h3>
+            <div id="chatContent" class="h-64 overflow-y-auto border border-gray-200 rounded p-4 mb-4">
+                <!-- Chat messages will appear here -->
+            </div>
+            <div class="flex space-x-2">
+                <input id="chatInput" type="text" class="flex-grow border border-gray-300 rounded px-4 py-2" placeholder="Escribe un mensaje...">
+                <button id="sendChatBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Enviar</button>
+                <a id="whatsappLink" href="#" target="_blank" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center space-x-2">
+                    <i class="fab fa-whatsapp text-2xl"></i>
+                    <span>WhatsApp</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock service requests data
+        const mockServiceRequests = [
+            {
+                id: 1,
+                clientName: 'Cliente 1',
+                description: 'Necesito una reparación urgente en la cocina.',
+                whatsapp: '56912345678'
+            },
+            {
+                id: 2,
+                clientName: 'Cliente 2',
+                description: 'Instalación eléctrica en el nuevo local.',
+                whatsapp: '56987654321'
+            },
+            {
+                id: 3,
+                clientName: 'Cliente 3',
+                description: 'Revisión y mantenimiento de aire acondicionado.',
+                whatsapp: '56911223344'
+            }
+        ];
+
+        const serviceRequestsContainer = document.getElementById('serviceRequestsContainer');
+        const chatModal = document.getElementById('chatModal');
+        const chatContent = document.getElementById('chatContent');
+        const chatInput = document.getElementById('chatInput');
+        const sendChatBtn = document.getElementById('sendChatBtn');
+        const whatsappLink = document.getElementById('whatsappLink');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+
+        let currentChatRequest = null;
+
+        // Function to render service requests
+        function renderServiceRequests() {
+            serviceRequestsContainer.innerHTML = '';
+            mockServiceRequests.forEach(request => {
+                const requestDiv = document.createElement('div');
+                requestDiv.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg';
+                requestDiv.innerHTML = `
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-blue-100 rounded-full p-3">
+                            <i class="fas fa-tools text-blue-600"></i>
                         </div>
+                        <div>
+                            <h3 class="font-medium text-gray-900">${request.clientName}</h3>
+                            <p class="text-sm text-gray-500">${request.description}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600" onclick="acceptRequest(${request.id})">
+                            Aceptar
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300" onclick="rejectRequest(${request.id})">
+                            Rechazar
+                        </button>
+                    </div>
+                `;
+                serviceRequestsContainer.appendChild(requestDiv);
+            });
+        }
+
+        // Function to accept a service request
+        function acceptRequest(id) {
+            currentChatRequest = mockServiceRequests.find(r => r.id === id);
+            if (!currentChatRequest) return;
+
+            // Show chat modal
+            chatModal.classList.remove('hidden');
+            chatContent.innerHTML = `<p><strong>${currentChatRequest.clientName}:</strong> ${currentChatRequest.description}</p>`;
+            chatInput.value = '';
+            whatsappLink.href = `https://wa.me/${currentChatRequest.whatsapp}`;
+        }
+
+        // Function to reject a service request
+        function rejectRequest(id) {
+            const index = mockServiceRequests.findIndex(r => r.id === id);
+            if (index !== -1) {
+                mockServiceRequests.splice(index, 1);
+                renderServiceRequests();
+            }
+        }
+
+        // Function to send a chat message
+        function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            const messageP = document.createElement('p');
+            messageP.innerHTML = `<strong>Proveedor:</strong> ${message}`;
+            chatContent.appendChild(messageP);
+            chatInput.value = '';
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        sendChatBtn.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+
+        closeChatBtn.addEventListener('click', () => {
+            chatModal.classList.add('hidden');
+            currentChatRequest = null;
+        });
+
+        // Initial render
+        renderServiceRequests();
+    </script>
+</body>
+</html>
 
                         <!-- Request 2 -->
                         <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
