@@ -12,7 +12,7 @@
     <!-- Iconos y Leaflet -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-
+    
     <style>
         .card-hover {
             transition: transform 0.2s ease-in-out;
@@ -20,12 +20,25 @@
         .card-hover:hover {
             transform: translateY(-4px);
         }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 320px;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .profile-dropdown.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
         }
         #map {
             height: 400px;
@@ -33,31 +46,20 @@
             border-radius: 1rem;
             margin-bottom: 1rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            position: relative;
+            z-index: 1;
         }
-        .profile-dropdown {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
-            width: 320px;
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            z-index: 50;
-            animation: slideDown 0.2s ease-out;
+        .user-marker {
+            z-index: 1000;
         }
-        .profile-dropdown.show {
-            display: block;
-        }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .client-marker {
+            z-index: 999;
         }
     </style>
 </head>
 <body class="font-inter bg-gray-50 min-h-screen antialiased">
     <!-- Navbar -->
-    <nav class="bg-white shadow-sm fixed w-full z-10">
+    <nav class="bg-white shadow-sm fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
@@ -73,44 +75,43 @@
                     <div class="relative" id="userMenuContainer">
                         <button id="userMenuButton" 
                                 class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
-                            <img class="h-8 w-8 rounded-full" src="https://ui-avatars.com/api/?name=Provider&background=0D8ABC&color=fff" alt="Provider">
-                            <span class="font-medium">Mi Perfil</span>
-                            <i class="fas fa-chevron-down text-sm"></i>
+                            <img id="userMenuImage" class="h-8 w-8 rounded-full object-cover" 
+                                 src="https://ui-avatars.com/api/?name=Usuario&background=0D8ABC&color=fff" 
+                                 alt="Profile">
+                            <div class="flex flex-col items-start">
+                                <span id="userMenuName" class="font-medium"></span>
+                                <span id="userMenuService" class="text-sm text-gray-600"></span>
+                            </div>
+                            <i class="fas fa-chevron-down text-sm ml-2"></i>
                         </button>
                         <!-- Profile Dropdown -->
-                        <div id="profileDropdown" class="profile-dropdown">
+                        <div id="profileDropdown" class="profile-dropdown bg-white rounded-lg shadow-xl">
                             <div class="p-4 border-b border-gray-200">
                                 <div class="flex items-center space-x-3">
-                                    <img class="h-12 w-12 rounded-full" src="https://ui-avatars.com/api/?name=Provider&background=0D8ABC&color=fff" alt="Provider">
+                                    <img id="userProfileImage" class="h-12 w-12 rounded-full object-cover" 
+                                         src="https://ui-avatars.com/api/?name=Usuario&background=0D8ABC&color=fff" 
+                                         alt="Profile">
                                     <div>
-                                        <h3 class="font-semibold text-gray-900">Juan Pérez</h3>
-                                        <p class="text-sm text-gray-600">Electricista</p>
+                                        <h3 id="userProfileName" class="font-semibold text-gray-900"></h3>
+                                        <p id="userProfileRole" class="text-sm text-gray-600"></p>
                                     </div>
                                 </div>
                             </div>
                             <div class="py-2">
-                                <a href="#perfil" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-user-circle w-5 mr-3"></i>
-                                    Editar Perfil
-                                </a>
-                                <a href="#cuenta" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                <a href="settings.html" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
                                     <i class="fas fa-cog w-5 mr-3"></i>
                                     Ajustes de Cuenta
                                 </a>
-                                <a href="#documentos" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                <a href="#documents" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
                                     <i class="fas fa-file-alt w-5 mr-3"></i>
                                     Documentos
                                 </a>
-                                <a href="#pagos" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-credit-card w-5 mr-3"></i>
-                                    Pagos
-                                </a>
-                                <hr class="my-2 border-gray-200">
-                                <a href="#ayuda" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
+                                <a href="help.html" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
                                     <i class="fas fa-question-circle w-5 mr-3"></i>
-                                    Ayuda y Soporte
+                                    Ayuda
                                 </a>
-                                <button onclick="handleLogout()" class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer">
+                                <hr class="my-2 border-gray-200" />
+                                <button onclick="handleLogout()" class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer transition-colors duration-150">
                                     <i class="fas fa-sign-out-alt w-5 mr-3"></i>
                                     Cerrar Sesión
                                 </button>
@@ -129,16 +130,16 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Servicios Completados</p>
-                        <h3 class="text-2xl font-bold text-gray-900 mt-1">24</h3>
+                        <h3 id="completedServices" class="text-2xl font-bold text-gray-900 mt-1">0</h3>
                     </div>
                     <div class="bg-blue-100 rounded-full p-3">
                         <i class="fas fa-check-circle text-blue-600 text-xl"></i>
                     </div>
                 </div>
                 <div class="mt-4">
-                    <span class="text-green-500 text-sm font-medium">
-                        <i class="fas fa-arrow-up mr-1"></i>
-                        12% más que el mes pasado
+                    <span class="text-gray-500 text-sm">
+                        <i class="fas fa-chart-line mr-1"></i>
+                        Total de servicios realizados
                     </span>
                 </div>
             </div>
@@ -147,19 +148,19 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Calificación Promedio</p>
-                        <h3 class="text-2xl font-bold text-gray-900 mt-1">4.8</h3>
+                        <h3 id="averageRating" class="text-2xl font-bold text-gray-900 mt-1">--</h3>
                     </div>
                     <div class="bg-yellow-100 rounded-full p-3">
                         <i class="fas fa-star text-yellow-500 text-xl"></i>
                     </div>
                 </div>
                 <div class="mt-4">
-                    <div class="flex items-center text-yellow-500">
+                    <div id="ratingStars" class="flex items-center text-gray-400">
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
+                        <i class="fas fa-star"></i>
                     </div>
                 </div>
             </div>
@@ -168,16 +169,16 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Ingresos del Mes</p>
-                        <h3 class="text-2xl font-bold text-gray-900 mt-1">$2,450</h3>
+                        <h3 id="monthlyEarnings" class="text-2xl font-bold text-gray-900 mt-1">$0</h3>
                     </div>
                     <div class="bg-green-100 rounded-full p-3">
                         <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
                     </div>
                 </div>
                 <div class="mt-4">
-                    <span class="text-green-500 text-sm font-medium">
-                        <i class="fas fa-arrow-up mr-1"></i>
-                        8% más que el mes pasado
+                    <span class="text-gray-500 text-sm">
+                        <i class="fas fa-calendar mr-1"></i>
+                        Este mes
                     </span>
                 </div>
             </div>
@@ -186,16 +187,16 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500">Solicitudes Pendientes</p>
-                        <h3 class="text-2xl font-bold text-gray-900 mt-1">3</h3>
+                        <h3 id="pendingRequests" class="text-2xl font-bold text-gray-900 mt-1">0</h3>
                     </div>
                     <div class="bg-purple-100 rounded-full p-3">
                         <i class="fas fa-clock text-purple-600 text-xl"></i>
                     </div>
                 </div>
                 <div class="mt-4">
-                    <span class="text-purple-500 text-sm font-medium">
+                    <span class="text-gray-500 text-sm">
                         <i class="fas fa-info-circle mr-1"></i>
-                        Requieren atención
+                        Por atender
                     </span>
                 </div>
             </div>
@@ -207,10 +208,10 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold text-gray-900">Mi Ubicación y Clientes</h2>
                     <div class="flex items-center space-x-2">
-                        <span class="text-sm text-green-600">
-                            <i class="fas fa-circle text-xs mr-1"></i>
-                            Ubicación compartida
-                        </span>
+                        <button onclick="showLocationPrompt()" class="text-blue-600 hover:text-blue-700">
+                            <i class="fas fa-location-arrow mr-1"></i>
+                            Actualizar ubicación
+                        </button>
                     </div>
                 </div>
                 <div id="map"></div>
@@ -221,171 +222,54 @@
             </div>
         </div>
 
-    <!-- Service Requests Section -->
-    <div class="mb-8">
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-            <div class="p-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-4">Solicitudes de Servicio</h2>
-                <div class="space-y-6" id="serviceRequestsContainer">
-                    <!-- Service requests will be dynamically added here -->
+        <!-- Main Content Sections -->
+        <div id="mainContent">
+            <!-- Service Requests Section -->
+            <div id="serviceRequests" class="mb-8">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Solicitudes de Servicio</h2>
+                        <div class="space-y-6" id="serviceRequestsContainer">
+                            <!-- Service requests will be dynamically added here -->
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Chat Modal -->
-    <div id="chatModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
-            <button id="closeChatBtn" class="absolute top-4 right-4 text-gray-600 hover:text-gray-900">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
-            <h3 class="text-xl font-semibold mb-4">Chat con Cliente</h3>
-            <div id="chatContent" class="h-64 overflow-y-auto border border-gray-200 rounded p-4 mb-4">
-                <!-- Chat messages will appear here -->
-            </div>
-            <div class="flex space-x-2">
-                <input id="chatInput" type="text" class="flex-grow border border-gray-300 rounded px-4 py-2" placeholder="Escribe un mensaje...">
-                <button id="sendChatBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Enviar</button>
-                <a id="whatsappLink" href="#" target="_blank" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center space-x-2">
-                    <i class="fab fa-whatsapp text-2xl"></i>
-                    <span>WhatsApp</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Mock service requests data
-        const mockServiceRequests = [
-            {
-                id: 1,
-                clientName: 'Cliente 1',
-                description: 'Necesito una reparación urgente en la cocina.',
-                whatsapp: '56912345678'
-            },
-            {
-                id: 2,
-                clientName: 'Cliente 2',
-                description: 'Instalación eléctrica en el nuevo local.',
-                whatsapp: '56987654321'
-            },
-            {
-                id: 3,
-                clientName: 'Cliente 3',
-                description: 'Revisión y mantenimiento de aire acondicionado.',
-                whatsapp: '56911223344'
-            }
-        ];
-
-        const serviceRequestsContainer = document.getElementById('serviceRequestsContainer');
-        const chatModal = document.getElementById('chatModal');
-        const chatContent = document.getElementById('chatContent');
-        const chatInput = document.getElementById('chatInput');
-        const sendChatBtn = document.getElementById('sendChatBtn');
-        const whatsappLink = document.getElementById('whatsappLink');
-        const closeChatBtn = document.getElementById('closeChatBtn');
-
-        let currentChatRequest = null;
-
-        // Function to render service requests
-        function renderServiceRequests() {
-            serviceRequestsContainer.innerHTML = '';
-            mockServiceRequests.forEach(request => {
-                const requestDiv = document.createElement('div');
-                requestDiv.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg';
-                requestDiv.innerHTML = `
-                    <div class="flex items-center space-x-4">
-                        <div class="bg-blue-100 rounded-full p-3">
-                            <i class="fas fa-tools text-blue-600"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-medium text-gray-900">${request.clientName}</h3>
-                            <p class="text-sm text-gray-500">${request.description}</p>
-                        </div>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600" onclick="acceptRequest(${request.id})">
-                            Aceptar
-                        </button>
-                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300" onclick="rejectRequest(${request.id})">
-                            Rechazar
-                        </button>
-                    </div>
-                `;
-                serviceRequestsContainer.appendChild(requestDiv);
-            });
-        }
-
-        // Function to accept a service request
-        function acceptRequest(id) {
-            currentChatRequest = mockServiceRequests.find(r => r.id === id);
-            if (!currentChatRequest) return;
-
-            // Show chat modal
-            chatModal.classList.remove('hidden');
-            chatContent.innerHTML = `<p><strong>${currentChatRequest.clientName}:</strong> ${currentChatRequest.description}</p>`;
-            chatInput.value = '';
-            whatsappLink.href = `https://wa.me/${currentChatRequest.whatsapp}`;
-        }
-
-        // Function to reject a service request
-        function rejectRequest(id) {
-            const index = mockServiceRequests.findIndex(r => r.id === id);
-            if (index !== -1) {
-                mockServiceRequests.splice(index, 1);
-                renderServiceRequests();
-            }
-        }
-
-        // Function to send a chat message
-        function sendChatMessage() {
-            const message = chatInput.value.trim();
-            if (!message) return;
-
-            const messageP = document.createElement('p');
-            messageP.innerHTML = `<strong>Proveedor:</strong> ${message}`;
-            chatContent.appendChild(messageP);
-            chatInput.value = '';
-            chatContent.scrollTop = chatContent.scrollHeight;
-        }
-
-        sendChatBtn.addEventListener('click', sendChatMessage);
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendChatMessage();
-            }
-        });
-
-        closeChatBtn.addEventListener('click', () => {
-            chatModal.classList.add('hidden');
-            currentChatRequest = null;
-        });
-
-        // Initial render
-        renderServiceRequests();
-    </script>
-</body>
-</html>
-
-                        <!-- Request 2 -->
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div class="flex items-center space-x-4">
-                                <div class="bg-yellow-100 rounded-full p-3">
-                                    <i class="fas fa-bolt text-yellow-600"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-medium text-gray-900">Instalación Eléctrica</h3>
-                                    <p class="text-sm text-gray-500">Hace 15 minutos • 1.5 km</p>
-                                </div>
+            <!-- Documents Section -->
+            <div id="documentsSection" class="mb-8 hidden">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                    <div class="p-6">
+                        <div class="flex flex-col space-y-4">
+                            <div class="flex items-center">
+                                <button onclick="backToServiceRequests()" 
+                                        class="text-gray-600 hover:text-gray-900 transition-colors">
+                                    <i class="fas fa-arrow-left mr-2"></i>
+                                    Volver a Solicitudes
+                                </button>
                             </div>
-                            <div class="flex space-x-2">
-                                <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-                                    Aceptar
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-xl font-semibold text-gray-900">Mis Documentos</h2>
+                                <button onclick="document.getElementById('fileInput').click()" 
+                                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Subir Documento</span>
                                 </button>
-                                <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                                    Rechazar
-                                </button>
+                            </div>
+                        </div>
+                        <input type="file" id="fileInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(event)">
+
+                        <!-- Documents Grid -->
+                        <div id="documentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                            <!-- Documents will be added here dynamically -->
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="emptyState" class="text-center py-12">
+                            <div class="bg-gray-50 rounded-lg p-8 inline-block">
+                                <i class="fas fa-file-upload text-gray-400 text-4xl mb-4"></i>
+                                <p class="text-gray-600">No hay documentos subidos</p>
+                                <p class="text-gray-500 text-sm mt-2">Sube tus documentos haciendo clic en el botón "Subir Documento"</p>
                             </div>
                         </div>
                     </div>
@@ -394,360 +278,66 @@
         </div>
     </main>
 
+    <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="js/provider-view.js"></script>
+    <script src="js/location-handler.js"></script>
     <script>
-        // Development mode flag
-        const isDevelopment = true;
-
-        // Map and location functionality
-        let map = null;
-        let providerMarker = null;
-        const TALCA_CENTER = [-35.4264, -71.6553];
-        let mapInitialized = false;
-
-        // Mock location for testing
-        const useMockLocation = true;
-        const mockLocation = {
-            coords: {
-                latitude: -35.4264,
-                longitude: -71.6553,
-                accuracy: 10
-            }
-        };
-
-        function showLocationPrompt() {
-            const overlay = document.createElement('div');
-            overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            overlay.innerHTML = `
-                <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">
-                        <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
-                        Ubicación Requerida
-                    </h3>
-                    <p class="text-gray-600 mb-6">
-                        Para poder ver el mapa y conectarte con clientes cercanos, necesitamos acceso a tu ubicación.
-                    </p>
-                    <button onclick="requestLocation()" 
-                            class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center">
-                        <i class="fas fa-location-arrow mr-2"></i>
-                        Compartir Mi Ubicación
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-        }
-
-        function initMap(location = TALCA_CENTER) {
-            console.log('Initializing map with location:', location);
+        // Menu functionality
+        function initUserMenu() {
+            const menuButton = document.getElementById('userMenuButton');
+            const menu = document.getElementById('profileDropdown');
             
-            try {
-                if (map) {
-                    console.log('Removing existing map');
-                    map.remove();
-                }
-
-                const mapContainer = document.getElementById('map');
-                if (!mapContainer) {
-                    throw new Error('Map container not found');
-                }
-
-                console.log('Creating new map instance');
-                map = L.map('map').setView(location, 14);
-                
-                console.log('Adding tile layer');
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-
-                console.log('Adding provider marker');
-                providerMarker = L.marker(location, {
-                    icon: L.divIcon({
-                        className: 'provider-marker',
-                        html: '<div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><i class="fas fa-user text-white"></i></div>',
-                        iconSize: [32, 32],
-                        iconAnchor: [16, 16]
-                    })
-                }).addTo(map);
-
-                mapInitialized = true;
-                console.log('Map initialization complete');
-                return true;
-            } catch (error) {
-                console.error('Error initializing map:', error);
-                showNotification('Error al inicializar el mapa: ' + error.message, 'error');
-                return false;
-            }
-        }
-
-        function requestLocation() {
-            console.log('Requesting location...');
-            
-            if (useMockLocation) {
-                console.log('Using mock location');
-                handleLocationSuccess(mockLocation);
-                return;
-            }
-
-            if (!navigator.geolocation) {
-                console.error('Geolocation is not supported');
-                showNotification('Tu navegador no soporta geolocalización', 'error');
-                return;
-            }
-
-            const options = {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 0
-            };
-
-            navigator.geolocation.getCurrentPosition(handleLocationSuccess, handleLocationError, options);
-        }
-
-        async function handleLocationSuccess(position) {
-            try {
-                console.log('Location received:', position.coords);
-                
-                // Remove overlay if exists
-                const overlay = document.querySelector('.fixed.inset-0');
-                if (overlay) {
-                    overlay.remove();
-                }
-
-                const providerLocation = [position.coords.latitude, position.coords.longitude];
-                console.log('Provider location:', providerLocation);
-
-                // Show the map container
-                const mapContainer = document.getElementById('mapContainer');
-                if (!mapContainer) {
-                    throw new Error('Map container not found!');
-                }
-
-                // Initialize or update map
-                if (!mapInitialized) {
-                    if (!initMap(providerLocation)) {
-                        throw new Error('Failed to initialize map');
-                    }
-                } else {
-                    map.setView(providerLocation, 14);
-                    providerMarker.setLatLng(providerLocation);
-                }
-
-                // Show map container with animation
-                mapContainer.classList.remove('hidden');
-                mapContainer.classList.add('fade-in');
-
-                // Invalidate map size to fix rendering issue
-                setTimeout(() => {
-                    map.invalidateSize();
-                }, 200);
-
-                // Add popup to provider marker
-                providerMarker.bindPopup('Tu ubicación actual').openPopup();
-
-                // Save provider location to server
-                console.log('Updating provider location on server...');
-                await updateProviderLocation(providerLocation);
-
-                // Show success message
-                showNotification('Ubicación compartida correctamente');
-
-                // Load nearby clients
-                console.log('Loading nearby clients...');
-                await loadNearbyClients(providerLocation);
-
-            } catch (error) {
-                console.error('Error in location handling:', error);
-                showNotification('Error al compartir ubicación: ' + error.message, 'error');
-            }
-        }
-
-        function handleLocationError(error) {
-            console.error('Geolocation error:', error);
-            let errorMsg = 'Error al obtener ubicación: ';
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMsg += 'Permiso denegado. Por favor habilita el acceso a la ubicación.';
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    errorMsg += 'Ubicación no disponible.';
-                    break;
-                case error.TIMEOUT:
-                    errorMsg += 'Tiempo de espera agotado.';
-                    break;
-                default:
-                    errorMsg += error.message;
-            }
-            showNotification(errorMsg, 'error');
-        }
-
-        async function updateProviderLocation(location) {
-            try {
-                if (isDevelopment) {
-                    console.log('Development mode: Simulating location update success');
-                    return true;
-                }
-
-                const response = await fetch('/api/provider/location', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        latitude: location[0],
-                        longitude: location[1]
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Error al actualizar ubicación');
-                }
-                
-                return true;
-            } catch (error) {
-                if (isDevelopment) {
-                    console.warn('Development mode: Ignoring server error:', error);
-                    return true;
-                }
-                console.error('Error:', error);
-                throw error;
-            }
-        }
-
-        async function loadNearbyClients(location) {
-            try {
-                if (isDevelopment) {
-                    console.log('Development mode: Loading mock nearby clients');
-                    const mockClients = [
-                        {
-                            latitude: location[0] + 0.002,
-                            longitude: location[1] + 0.002,
-                            name: 'Cliente Cercano 1',
-                            distance: 0.5
-                        },
-                        {
-                            latitude: location[0] - 0.001,
-                            longitude: location[1] + 0.001,
-                            name: 'Cliente Cercano 2',
-                            distance: 0.3
-                        }
-                    ];
-                    
-                    mockClients.forEach(client => {
-                        L.marker([client.latitude, client.longitude], {
-                            icon: L.divIcon({
-                                className: 'client-marker',
-                                html: '<div class="w-8 h-8 bg-green-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><i class="fas fa-user text-white"></i></div>',
-                                iconSize: [32, 32],
-                                iconAnchor: [16, 16]
-                            })
-                        })
-                        .addTo(map)
-                        .bindPopup(`
-                            <div class="text-center">
-                                <h3 class="font-semibold">${client.name}</h3>
-                                <p class="text-sm text-gray-600">${client.distance.toFixed(1)} km</p>
-                            </div>
-                        `);
-                    });
-                    return;
-                }
-
-                const response = await fetch(`/api/provider/nearby-clients?lat=${location[0]}&lng=${location[1]}`);
-                const clients = await response.json();
-                
-                clients.forEach(client => {
-                    L.marker([client.latitude, client.longitude], {
-                        icon: L.divIcon({
-                            className: 'client-marker',
-                            html: '<div class="w-8 h-8 bg-green-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center"><i class="fas fa-user text-white"></i></div>',
-                            iconSize: [32, 32],
-                            iconAnchor: [16, 16]
-                        })
-                    })
-                    .addTo(map)
-                    .bindPopup(`
-                        <div class="text-center">
-                            <h3 class="font-semibold">${client.name}</h3>
-                            <p class="text-sm text-gray-600">${client.distance.toFixed(1)} km</p>
-                        </div>
-                    `);
-                });
-                
-            } catch (error) {
-                if (isDevelopment) {
-                    console.warn('Development mode: Ignoring server error:', error);
-                    return;
-                }
-                console.error('Error loading nearby clients:', error);
-                throw error;
-            }
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-            notification.className = `fixed bottom-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-500 flex items-center space-x-2`;
-            
-            const icon = document.createElement('i');
-            icon.className = `fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`;
-            notification.appendChild(icon);
-            
-            const text = document.createElement('span');
-            text.textContent = message;
-            notification.appendChild(text);
-            
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => notification.remove(), 500);
-            }, 3000);
-        }
-
-        // Handle logout
-        function handleLogout() {
-            if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
-                // Clear any stored user data
-                localStorage.clear();
-                sessionStorage.clear();
-                
-                // Redirect to login page
-                window.location.href = '/index.html';
-            }
-        }
-
-        // Profile Dropdown Functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const userMenuButton = document.getElementById('userMenuButton');
-            const profileDropdown = document.getElementById('profileDropdown');
-            
-            userMenuButton.addEventListener('click', function(e) {
+            menuButton.addEventListener('click', function(e) {
                 e.stopPropagation();
-                profileDropdown.classList.toggle('show');
+                menu.classList.toggle('show');
             });
 
             document.addEventListener('click', function(e) {
-                if (!profileDropdown.contains(e.target) && !userMenuButton.contains(e.target)) {
-                    profileDropdown.classList.remove('show');
+                if (!menu.contains(e.target) && !menuButton.contains(e.target)) {
+                    menu.classList.remove('show');
                 }
             });
 
-            // Handle profile menu items
-            document.querySelectorAll('#profileDropdown a').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    if (this.getAttribute('href') === '/auth/logout') {
-                        e.preventDefault();
-                        if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
-                            window.location.href = '/auth/logout';
-                        }
-                    }
+            // Close menu when clicking menu items
+            document.querySelectorAll('#profileDropdown a, #profileDropdown button').forEach(item => {
+                item.addEventListener('click', function() {
+                    menu.classList.remove('show');
                 });
             });
+        }
 
-            // Initialize map
-            console.log('DOM loaded, showing location prompt...');
-            showLocationPrompt();
+        // Handle hash changes
+        function handleHashChange() {
+            const hash = window.location.hash.substring(1);
+            // Hide all sections first
+            document.querySelectorAll('#mainContent > div').forEach(div => {
+                div.classList.add('hidden');
+            });
+
+            // Show selected section
+            switch(hash) {
+                case 'documents':
+                    document.getElementById('documentsSection').classList.remove('hidden');
+                    document.getElementById('profileDropdown').classList.remove('show');
+                    initDocuments(); // Initialize documents view
+                    break;
+                default:
+                    document.getElementById('serviceRequests').classList.remove('hidden');
+                    break;
+            }
+        }
+
+        // Handle back to service requests
+        function backToServiceRequests() {
+            window.location.hash = '';
+            handleHashChange();
+        }
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            initUserMenu();
+            handleHashChange();
         });
     </script>
 </body>
