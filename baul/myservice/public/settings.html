@@ -17,11 +17,14 @@
     <nav class="bg-white shadow-md fixed w-full top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/customer-view.html" class="flex items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="provider-view.html" class="text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </a>
+                    <div class="flex items-center">
                         <i class="fas fa-handshake text-blue-600 text-2xl mr-2"></i>
                         <span class="text-xl font-bold text-gray-900">MyService PRO</span>
-                    </a>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-4">
                     <button class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
@@ -36,21 +39,11 @@
                             <i class="fas fa-chevron-down text-sm"></i>
                         </button>
                         <!-- Dropdown Menu -->
-                        <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden z-50">
-                            <a href="#perfil" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-user mr-2"></i> Mi Perfil
-                            </a>
-                            <a href="#ajustes" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-cog mr-2"></i> Ajustes de Cuenta
-                            </a>
-                            <a href="#notificaciones" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-bell mr-2"></i> Notificaciones
-                            </a>
-                            <hr class="my-2 border-gray-200">
-              <a href="/auth/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
-                            </a>
-                        </div>
+                            <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden z-50">
+                                <button onclick="handleLogout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+                                </button>
+                            </div>
                     </div>
                 </div>
             </div>
@@ -63,8 +56,8 @@
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <h1 class="text-2xl font-bold text-gray-900 mb-6">Ajustes de Cuenta</h1>
 
-                <!-- Profile Photo Section -->
-                <div class="mb-8">
+                <!-- Profile Section -->
+                <div id="profileSection" class="mb-8">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Foto de Perfil</h2>
                     <div class="flex items-center space-x-6">
                         <div class="relative">
@@ -88,8 +81,8 @@
                     </div>
                 </div>
 
-                <!-- Personal Information -->
-                <div class="mb-8">
+                <!-- Settings Section -->
+                <div id="settingsSection" class="mb-8">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Información Personal</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -107,6 +100,40 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
                             <input type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents Section -->
+                <div id="documentsSection" class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Documentos</h2>
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <p class="text-gray-600 mb-4">Sube y gestiona tus documentos importantes aquí.</p>
+                            <div class="flex items-center justify-center w-full">
+                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <i class="fas fa-cloud-upload-alt text-gray-400 text-3xl mb-3"></i>
+                                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click para subir</span> o arrastra y suelta</p>
+                                        <p class="text-xs text-gray-500">PDF, JPG, PNG (MAX. 10MB)</p>
+                                    </div>
+                                    <input type="file" class="hidden" />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payments Section -->
+                <div id="paymentsSection" class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Pagos</h2>
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <p class="text-gray-600 mb-4">Configura tus métodos de pago y revisa tu historial de transacciones.</p>
+                            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>
+                                Agregar método de pago
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -197,6 +224,15 @@
     </main>
 
     <script>
+        // Handle logout
+        function handleLogout() {
+            if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+
         // Phone verification functionality
         function sendVerificationCode() {
             const phoneNumber = document.getElementById('phoneNumber').value.trim();
@@ -338,7 +374,38 @@
         // Initialize on page load
         window.onload = () => {
             initUserMenu();
+            
+            // Handle back button
+            const backButton = document.querySelector('a[href="provider-view.html"]');
+            backButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = 'provider-view.html';
+            });
+
+            // Show appropriate section based on hash
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                const sections = ['profile', 'settings', 'documents', 'payments'];
+                if (sections.includes(hash)) {
+                    // Scroll to the appropriate section
+                    const section = document.querySelector(`[id="${hash}Section"]`);
+                    if (section) {
+                        section.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            }
         };
+
+        // Handle hash changes
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                const section = document.querySelector(`[id="${hash}Section"]`);
+                if (section) {
+                    section.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
     </script>
 </body>
 </html>
