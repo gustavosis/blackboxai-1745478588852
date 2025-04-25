@@ -84,11 +84,19 @@ db.serialize(() => {
   });
 });
 
+const debugRoutes = require('./server/routes/debug');
+const listRoutes = require('./server/routes/list-routes');
+
 // Routes
 app.use('/auth', require('./server/routes/auth'));
 app.use('/location-sharing', require('./server/routes/location-sharing'));
 app.use('/providers', require('./server/routes/providers'));
 app.use('/service-requests', require('./server/routes/service-requests'));
+app.use('/debug', debugRoutes);
+app.use('/list', listRoutes);
+
+// Serve static files - moved after API routes
+app.use('/', express.static(path.join(__dirname, 'public')));
 
 // Serve index.html on root route
 app.get('/', (req, res) => {
