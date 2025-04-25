@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyService PRO - Vista del Proveedor</title>
+    
+    <!-- Tailwind CSS + Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .card-hover {
+            transition: transform 0.2s ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+        }
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 320px;
+            margin-top: 0.5rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .profile-dropdown.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen antialiased">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i class="fas fa-handshake text-blue-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-semibold text-gray-900">MyService PRO</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bell text-xl"></i>
+                    </button>
+                    <div class="relative" id="userMenuContainer">
+                        <button id="userMenuButton" 
+                                class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
+                            <img id="userMenuImage" class="h-8 w-8 rounded-full object-cover" 
+                                 src="https://ui-avatars.com/api/?name=Usuario&background=0D8ABC&color=fff" 
+                                 alt="Profile">
+                            <div class="flex flex-col items-start">
+                                <span id="userMenuName" class="font-medium"></span>
+                                <span id="userMenuService" class="text-sm text-gray-600"></span>
+                            </div>
+                            <i class="fas fa-chevron-down text-sm ml-2"></i>
+                        </button>
+                        <!-- Profile Dropdown -->
+                        <div id="profileDropdown" class="profile-dropdown bg-white rounded-lg shadow-xl">
+                            <div class="p-4 border-b border-gray-200">
+                                <div class="flex items-center space-x-3">
+                                    <img id="userProfileImage" class="h-12 w-12 rounded-full object-cover" 
+                                         src="https://ui-avatars.com/api/?name=Usuario&background=0D8ABC&color=fff" 
+                                         alt="Profile">
+                                    <div>
+                                        <h3 id="userProfileName" class="font-semibold text-gray-900"></h3>
+                                        <p id="userProfileRole" class="text-sm text-gray-600"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="py-2">
+                                <a href="settings.html" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                    <i class="fas fa-cog w-5 mr-3"></i>
+                                    Ajustes de Cuenta
+                                </a>
+                                <a href="#documents" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                    <i class="fas fa-file-alt w-5 mr-3"></i>
+                                    Documentos
+                                </a>
+                                <a href="help.html" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                    <i class="fas fa-question-circle w-5 mr-3"></i>
+                                    Ayuda
+                                </a>
+                                <hr class="my-2 border-gray-200" />
+                                <button onclick="handleLogout()" class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer transition-colors duration-150">
+                                    <i class="fas fa-sign-out-alt w-5 mr-3"></i>
+                                    Cerrar Sesión
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto pt-20 pb-6 px-4 sm:px-6 lg:px-8">
+        <!-- Stats Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Servicios Completados</p>
+                        <h3 id="completedServices" class="text-2xl font-bold text-gray-900 mt-1">0</h3>
+                    </div>
+                    <div class="bg-blue-100 rounded-full p-3">
+                        <i class="fas fa-check-circle text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <span class="text-gray-500 text-sm">
+                        <i class="fas fa-chart-line mr-1"></i>
+                        Total de servicios realizados
+                    </span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Calificación Promedio</p>
+                        <h3 id="averageRating" class="text-2xl font-bold text-gray-900 mt-1">--</h3>
+                    </div>
+                    <div class="bg-yellow-100 rounded-full p-3">
+                        <i class="fas fa-star text-yellow-500 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div id="ratingStars" class="flex items-center text-gray-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Ingresos del Mes</p>
+                        <h3 id="monthlyEarnings" class="text-2xl font-bold text-gray-900 mt-1">$0</h3>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-3">
+                        <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <span class="text-gray-500 text-sm">
+                        <i class="fas fa-calendar mr-1"></i>
+                        Este mes
+                    </span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 card-hover">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Solicitudes Pendientes</p>
+                        <h3 id="pendingRequests" class="text-2xl font-bold text-gray-900 mt-1">0</h3>
+                    </div>
+                    <div class="bg-purple-100 rounded-full p-3">
+                        <i class="fas fa-clock text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <span class="text-gray-500 text-sm">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Por atender
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Sections -->
+        <div id="mainContent">
+            <!-- Service Requests Section -->
+            <div id="serviceRequests" class="mb-8">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                    <div class="p-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4">Solicitudes de Servicio</h2>
+                        <div class="space-y-6" id="serviceRequestsContainer">
+                            <!-- Service requests will be dynamically added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Section -->
+            <div id="documentsSection" class="mb-8 hidden">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                    <div class="p-6">
+                        <div class="flex flex-col space-y-4">
+                            <div class="flex items-center">
+                                <button onclick="backToServiceRequests()" 
+                                        class="text-gray-600 hover:text-gray-900 transition-colors">
+                                    <i class="fas fa-arrow-left mr-2"></i>
+                                    Volver a Solicitudes
+                                </button>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-xl font-semibold text-gray-900">Mis Documentos</h2>
+                                <button onclick="document.getElementById('fileInput').click()" 
+                                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Subir Documento</span>
+                                </button>
+                            </div>
+                        </div>
+                        <input type="file" id="fileInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(event)">
+
+                        <!-- Documents Grid -->
+                        <div id="documentsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                            <!-- Documents will be added here dynamically -->
+                        </div>
+
+                        <!-- Empty State -->
+                        <div id="emptyState" class="text-center py-12">
+                            <div class="bg-gray-50 rounded-lg p-8 inline-block">
+                                <i class="fas fa-file-upload text-gray-400 text-4xl mb-4"></i>
+                                <p class="text-gray-600">No hay documentos subidos</p>
+                                <p class="text-gray-500 text-sm mt-2">Sube tus documentos haciendo clic en el botón "Subir Documento"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/user-data.js"></script>
+    <script>
+        // Menu functionality
+        function initUserMenu() {
+            const menuButton = document.getElementById('userMenuButton');
+            const menu = document.getElementById('profileDropdown');
+            
+            menuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                menu.classList.toggle('show');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!menu.contains(e.target) && !menuButton.contains(e.target)) {
+                    menu.classList.remove('show');
+                }
+            });
+
+            // Close menu when clicking menu items
+            document.querySelectorAll('#profileDropdown a, #profileDropdown button').forEach(item => {
+                item.addEventListener('click', function() {
+                    menu.classList.remove('show');
+                });
+            });
+        }
+
+        // Handle hash changes
+        function handleHashChange() {
+            const hash = window.location.hash.substring(1);
+            // Hide all sections first
+            document.querySelectorAll('#mainContent > div').forEach(div => {
+                div.classList.add('hidden');
+            });
+
+            // Show selected section
+            switch(hash) {
+                case 'documents':
+                    document.getElementById('documentsSection').classList.remove('hidden');
+                    document.getElementById('profileDropdown').classList.remove('show');
+                    initDocuments(); // Initialize documents view
+                    break;
+                default:
+                    document.getElementById('serviceRequests').classList.remove('hidden');
+                    break;
+            }
+        }
+
+        // Handle back to service requests
+        function backToServiceRequests() {
+            window.location.hash = '';
+            handleHashChange();
+        }
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            initUserMenu();
+            handleHashChange();
+        });
+    </script>
+</body>
+</html>
