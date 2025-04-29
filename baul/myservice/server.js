@@ -10,6 +10,13 @@ if (!fs.existsSync(config.uploadDir)) {
   fs.mkdirSync(config.uploadDir);
 }
 
+  
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 // Setup middleware
 require('./server/middleware/setup')(app);
 
@@ -86,6 +93,7 @@ db.serialize(() => {
 
 const debugRoutes = require('./server/routes/debug');
 const listRoutes = require('./server/routes/list-routes');
+const userProfileRoutes = require('./server/routes/user-profile-updated');
 
 // Routes
 app.use('/auth', require('./server/routes/auth'));
@@ -94,6 +102,7 @@ app.use('/providers', require('./server/routes/providers'));
 app.use('/service-requests', require('./server/routes/service-requests'));
 app.use('/debug', debugRoutes);
 app.use('/list', listRoutes);
+app.use('/user-profile', userProfileRoutes);
 
 // Serve static files - moved after API routes
 app.use('/', express.static(path.join(__dirname, 'public')));
@@ -106,6 +115,13 @@ app.get('/', (req, res) => {
 // Serve provider-view.html
 app.get('/provider-view.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'provider-view.html'));
+});
+
+  
+// Error logging middleware
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 // Start server
