@@ -1,61 +1,56 @@
-function loadUserData() {
-    const userData = JSON.parse(localStorage.getItem('userData')) || {
-        name: 'Usuario',
-        lastname: '',
-        service: '',
-        profileImage: null,
-        stats: {
-            completedServices: 0,
-            averageRating: 0,
-            monthlyEarnings: 0,
-            pendingRequests: 0,
-            totalServices: 0
-        }
-    };
+async function loadUserData() {
+    try {
+        const response = await fetch('/user-profile');
+        if (!response.ok) throw new Error('Failed to fetch user data');
+        const data = await response.json();
+        const userData = data.user;
 
-    // Update profile in menu
-    document.getElementById('userMenuName').textContent = userData.name + (userData.lastname ? ' ' + userData.lastname : '');
-    document.getElementById('userMenuService').textContent = userData.service;
-    
-    // Update profile in dropdown
-    document.getElementById('userProfileName').textContent = userData.name + (userData.lastname ? ' ' + userData.lastname : '');
-    document.getElementById('userProfileRole').textContent = userData.service;
-    
-    // Update profile images
-    const profileImages = ['userProfileImage', 'userMenuImage'];
-    profileImages.forEach(id => {
-        const img = document.getElementById(id);
-        if (img) {
-            if (userData.profileImage) {
-                img.src = userData.profileImage;
-            } else {
-                img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name + ' ' + userData.lastname)}&background=0D8ABC&color=fff`;
+        // Update profile in menu
+        document.getElementById('userMenuName').textContent = userData.name + (userData.lastname ? ' ' + userData.lastname : '');
+        document.getElementById('userMenuService').textContent = userData.service || '';
+
+        // Update profile in dropdown
+        document.getElementById('userProfileName').textContent = userData.name + (userData.lastname ? ' ' + userData.lastname : '');
+        document.getElementById('userProfileRole').textContent = userData.service || '';
+
+        // Update profile images
+        const profileImages = ['userProfileImage', 'userMenuImage'];
+        profileImages.forEach(id => {
+            const img = document.getElementById(id);
+            if (img) {
+                if (userData.profileImage) {
+                    img.src = userData.profileImage;
+                } else {
+                    img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name + ' ' + userData.lastname)}&background=0D8ABC&color=fff`;
+                }
             }
-        }
-    });
+        });
 
-    // Update stats
-    document.getElementById('completedServices').textContent = userData.stats.completedServices || '0';
-    document.getElementById('averageRating').textContent = userData.stats.averageRating > 0 ? 
-        userData.stats.averageRating.toFixed(1) : '--';
-    document.getElementById('monthlyEarnings').textContent = `$${userData.stats.monthlyEarnings || '0'}`;
-    document.getElementById('pendingRequests').textContent = userData.stats.pendingRequests || '0';
+        // Update stats
+        document.getElementById('completedServices').textContent = userData.stats?.completedServices || '0';
+        document.getElementById('averageRating').textContent = userData.stats?.averageRating > 0 ? 
+            userData.stats.averageRating.toFixed(1) : '--';
+        document.getElementById('monthlyEarnings').textContent = `$${userData.stats?.monthlyEarnings || '0'}`;
+        document.getElementById('pendingRequests').textContent = userData.stats?.pendingRequests || '0';
 
-    // Update rating stars
-    const rating = parseFloat(userData.stats.averageRating) || 0;
-    const starsContainer = document.getElementById('ratingStars');
-    if (starsContainer) {
-        const stars = starsContainer.getElementsByTagName('i');
-        for (let i = 0; i < stars.length; i++) {
-            stars[i].className = 'fas fa-star text-gray-300'; // Default gray stars
-            if (rating > 0) {
-                if (i < Math.floor(rating)) {
-                    stars[i].className = 'fas fa-star text-yellow-500';
-                } else if (i === Math.floor(rating) && rating % 1 > 0) {
-                    stars[i].className = 'fas fa-star-half-alt text-yellow-500';
+        // Update rating stars
+        const rating = parseFloat(userData.stats?.averageRating) || 0;
+        const starsContainer = document.getElementById('ratingStars');
+        if (starsContainer) {
+            const stars = starsContainer.getElementsByTagName('i');
+            for (let i = 0; i < stars.length; i++) {
+                stars[i].className = 'fas fa-star text-gray-300'; // Default gray stars
+                if (rating > 0) {
+                    if (i < Math.floor(rating)) {
+                        stars[i].className = 'fas fa-star text-yellow-500';
+                    } else if (i === Math.floor(rating) && rating % 1 > 0) {
+                        stars[i].className = 'fas fa-star-half-alt text-yellow-500';
+                    }
                 }
             }
         }
+    } catch (error) {
+        console.error('Error loading user data:', error);
     }
 }
 
@@ -220,6 +215,40 @@ function showNotification(message, type = 'success') {
         notification.style.opacity = '0';
         setTimeout(() => notification.remove(), 500);
     }, 3000);
+}
+
+function saveUserProfileChanges() {
+    const nameInput = document.getElementById('nameInput');
+    const lastnameInput = document.getElementById('lastnameInput');
+    const serviceInput = document.getElementById('serviceInput');
+    const emailInput = document.getElementById('emailInput');
+    const phoneInput = document.getElementById('phoneInput');
+
+    if (!nameInput.value.trim() || !lastnameInput.value.trim() || !serviceInput.value.trim() || !emailInput.value.trim() || !phoneInput.value.trim()) {
+        showNotification('Por favor, completa todos los campos obligatorios', 'error');
+        return;
+    }
+
+    const existingData = localStorage.getItem('userData');
+    const existingUserData = existingData ? JSON.parse(existingData) : {};
+
+    const updatedUserData = {
+        ...existingUserData,
+        name: nameInput.value.trim(),
+        lastname: lastnameInput.value.trim(),
+        service: serviceInput.value.trim(),
+        email: emailInput.value.trim(),
+        phone: phoneInput.value.trim()
+    };
+
+    // Save updated data to localStorage
+    localStorage.setItem('userData', JSON.stringify(updatedUserData));
+
+    // Update provider view menu immediately
+    loadUserData();
+
+    // Show success notification
+    showNotification('Perfil actualizado correctamente');
 }
 
 // Initialize on DOM load
