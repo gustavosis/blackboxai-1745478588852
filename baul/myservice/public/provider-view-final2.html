@@ -1,17 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MyService PRO - Vista del Proveedor</title>
-    
-    <!-- Tailwind CSS + Google Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Iconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
     <style>
         .card-hover {
             transition: transform 0.2s ease-in-out;
@@ -28,7 +24,8 @@
             margin-top: 0.5rem;
             background: white;
             border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
             z-index: 1000;
             opacity: 0;
             transform: translateY(-10px);
@@ -42,7 +39,6 @@
     </style>
 </head>
 <body class="font-inter bg-gray-50 min-h-screen antialiased">
-    <!-- Navbar -->
     <nav class="bg-white shadow-sm fixed w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -57,45 +53,64 @@
                         <i class="fas fa-bell text-xl"></i>
                     </button>
                     <div class="relative" id="userMenuContainer">
-                        <button id="userMenuButton" 
-                                class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
-                            <img id="userMenuImage" class="h-8 w-8 rounded-full object-cover" 
-                                 src="https://ui-avatars.com/api/?name=Usuario&background=0D8ABC&color=fff" 
-                                 alt="Profile">
+                        <button
+                            id="userMenuButton"
+                            class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200"
+                        >
+                            <img
+                                id="userMenuImage"
+                                class="h-8 w-8 rounded-full object-cover"
+                                src="https://ui-avatars.com/api/?name=Usuario&background=0D8ABC&color=fff"
+                                alt="Profile"
+                            />
                             <div class="flex flex-col items-start">
                                 <span id="userMenuName" class="font-medium"></span>
                                 <span id="userMenuService" class="text-sm text-gray-600"></span>
                             </div>
                             <i class="fas fa-chevron-down text-sm ml-2"></i>
                         </button>
-                        <!-- Profile Dropdown -->
                         <div id="profileDropdown" class="profile-dropdown bg-white rounded-lg shadow-xl">
                             <div class="p-4 border-b border-gray-200">
-                            <div class="flex items-center space-x-3">
-                                <img id="userProfileImage" class="h-12 w-12 rounded-full object-cover" 
-                                     src="https://ui-avatars.com/api/?name=Usuario&background=0D8ABC&color=fff" 
-                                     alt="Profile">
-                                <div>
-                                    <h3 id="userProfileName" class="font-semibold text-gray-900">Nombre Apellido</h3>
-                                    <p id="userProfileRole" class="text-sm text-gray-600">Profesión</p>
+                                <div class="flex items-center space-x-3">
+                                    <img
+                                        id="userProfileImage"
+                                        class="h-12 w-12 rounded-full object-cover"
+                                        src="https://ui-avatars.com/api/?name=Usuario&background=0D8ABC&color=fff"
+                                        alt="Profile"
+                                    />
+                                    <div>
+                                        <h3 id="userProfileName" class="font-semibold text-gray-900"></h3>
+                                        <p id="userProfileRole" class="text-sm text-gray-600"></p>
+                                    </div>
                                 </div>
                             </div>
-                            </div>
                             <div class="py-2">
-                                <a href="settings.html" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                <a
+                                    href="settings.html"
+                                    class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                                >
                                     <i class="fas fa-cog w-5 mr-3"></i>
                                     Ajustes de Cuenta
                                 </a>
-                                <a href="#documents" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                <a
+                                    href="#documents"
+                                    class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                                >
                                     <i class="fas fa-file-alt w-5 mr-3"></i>
                                     Documentos
                                 </a>
-                                <a href="help.html" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                <a
+                                    href="help.html"
+                                    class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                                >
                                     <i class="fas fa-question-circle w-5 mr-3"></i>
                                     Ayuda
                                 </a>
                                 <hr class="my-2 border-gray-200" />
-                                <button onclick="handleLogout()" class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer transition-colors duration-150">
+                                <button
+                                    onclick="handleLogout()"
+                                    class="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100 cursor-pointer transition-colors duration-150"
+                                >
                                     <i class="fas fa-sign-out-alt w-5 mr-3"></i>
                                     Cerrar Sesión
                                 </button>
@@ -108,7 +123,6 @@
     </nav>
 
     <main class="max-w-7xl mx-auto pt-20 pb-6 px-4 sm:px-6 lg:px-8">
-        <!-- Stats Section -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 card-hover">
                 <div class="flex items-center justify-between">
@@ -243,7 +257,8 @@
     </main>
 
     <!-- Scripts -->
-    <script src="js/provider-data.js"></script>
+    <script src="js/provider-view-updated.js"></script>
+    <script src="js/location-handler.js"></script>
     <script>
         // Menu functionality
         function initUserMenu() {
